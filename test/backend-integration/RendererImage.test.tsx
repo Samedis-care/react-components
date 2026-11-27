@@ -2,7 +2,7 @@ import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import RendererImage from "../../src/backend-integration/Model/Types/Renderers/RendererImage";
 import type ModelRenderParams from "../../src/backend-integration/Model/RenderParams";
-import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 
 /**
  * The image renderer where it only shows the picture: a read-only form field and a
@@ -11,7 +11,7 @@ import ccI18n from "../../src/i18n";
  */
 
 beforeAll(async () => {
-	await ccI18n.loadNamespaces("translation");
+	await waitForCcI18n();
 });
 
 afterEach(cleanup);

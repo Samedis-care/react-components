@@ -12,6 +12,7 @@ import ImageSelector, {
 	ImageSelectorProps,
 } from "../../src/standalone/FileUpload/Image/ImageSelector";
 import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 
 // jsdom has no canvas: the pipeline is replaced, and a pending promise models a large photo
 const processImageMock = vi.hoisted(() => vi.fn());
@@ -22,7 +23,7 @@ vi.mock("../../src/utils/getCanImageCapture", () => ({
 }));
 
 beforeAll(async () => {
-	await ccI18n.init();
+	await waitForCcI18n();
 });
 
 afterEach(() => {

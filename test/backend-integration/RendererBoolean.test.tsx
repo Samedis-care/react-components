@@ -6,6 +6,7 @@ import RendererBooleanCheckboxUIKit from "../../src/backend-integration/Model/Ty
 import type ModelRenderParams from "../../src/backend-integration/Model/RenderParams";
 import type TypeBoolean from "../../src/backend-integration/Model/Types/TypeBoolean";
 import ccI18n, { langs } from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 
 /**
  * The boolean renderers (MUI checkbox, MUI switch, UIKit checkbox) on a field that isn't
@@ -13,7 +14,7 @@ import ccI18n, { langs } from "../../src/i18n";
  */
 
 beforeAll(async () => {
-	await ccI18n.loadNamespaces("translation");
+	await waitForCcI18n();
 });
 
 afterEach(async () => {

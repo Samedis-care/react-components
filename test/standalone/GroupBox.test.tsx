@@ -5,6 +5,7 @@ import { ThemeProvider, createTheme, Theme } from "@mui/material";
 import GroupBox from "../../src/standalone/GroupBox";
 import { labelWithDirtyMarker } from "../../src/standalone/UIKit/MuiFieldState";
 import ccI18n, { langs } from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 
 afterEach(cleanup);
 
@@ -487,7 +488,7 @@ describe("GroupBox", () => {
 		describe("[ISSUE-3462-ITEM-11] required", () => {
 			// the "Required" text suspends until the library's translations load
 			beforeAll(async () => {
-				await ccI18n.loadNamespaces("translation");
+				await waitForCcI18n();
 			});
 
 			const asteriskOf = (group: HTMLElement) =>

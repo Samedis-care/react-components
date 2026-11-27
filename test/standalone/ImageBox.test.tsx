@@ -15,10 +15,10 @@ import ImageBox, {
 import ImageDots, {
 	ImageDotsProps,
 } from "../../src/standalone/FileUpload/MultiImage/ImageDots";
-import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 
 beforeAll(async () => {
-	await ccI18n.init();
+	await waitForCcI18n();
 	// jsdom has no layout and no Element.scrollTo; ImageBox centres its swipe pane with it
 	(Element.prototype as unknown as { scrollTo: unknown }).scrollTo ??= () =>
 		undefined;

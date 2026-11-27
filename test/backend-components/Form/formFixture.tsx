@@ -32,7 +32,7 @@ import {
 	ModelVisibilityEditRequired,
 	ModelVisibilityHidden,
 } from "../../../src/backend-integration";
-import ccI18n from "../../../src/i18n";
+import { waitForCcI18n } from "../../waitForCcI18n";
 
 /**
  * Registers what every Form test file needs: jsdom's missing matchMedia (the Framework's
@@ -57,7 +57,7 @@ export const setupFormTests = () => {
 		if (!Element.prototype.scrollIntoView) {
 			Element.prototype.scrollIntoView = () => {};
 		}
-		await ccI18n.loadNamespaces("translation");
+		await waitForCcI18n();
 	});
 	afterEach(() => {
 		cleanup();

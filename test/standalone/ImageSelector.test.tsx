@@ -14,6 +14,7 @@ import ImageSelector, {
 	ImageSelectorProps,
 } from "../../src/standalone/FileUpload/Image/ImageSelector";
 import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 
 // jsdom has no canvas, so the image pipeline itself is replaced; what is tested here is
 // when the control processes, what it does with the result and how it reports failures
@@ -32,7 +33,7 @@ vi.mock("../../src/framework/ErrorReporting", async (importOriginal) => ({
 }));
 
 beforeAll(async () => {
-	await ccI18n.init();
+	await waitForCcI18n();
 	// jsdom does not implement matchMedia, which the Framework's ThemeProvider needs.
 	if (!window.matchMedia) {
 		window.matchMedia = (query: string) => ({

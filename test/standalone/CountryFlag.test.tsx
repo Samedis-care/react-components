@@ -3,6 +3,7 @@ import React, { createRef, Suspense } from "react";
 import { act, cleanup, render, renderHook } from "@testing-library/react";
 import { createTheme, ThemeProvider } from "@mui/material";
 import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 // the tier index the package root re-exports (src/index.ts: export * from it)
 import {
 	CountryFlag,
@@ -15,8 +16,8 @@ import {
 const CountryFlags = await loadCountryFlags();
 
 beforeAll(async () => {
+	await waitForCcI18n(["translation", "countries"]);
 	await ccI18n.changeLanguage("en-US");
-	await ccI18n.loadNamespaces(["translation", "countries"]);
 	await ccI18n.loadLanguages(["de"]);
 });
 afterAll(async () => {

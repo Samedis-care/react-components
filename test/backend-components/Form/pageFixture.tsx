@@ -42,7 +42,7 @@ import createTestModel, {
 } from "../../../src/stories/test-utils/TestModel";
 import MockConnector from "../../../src/stories/test-utils/MockConnector";
 import { Model } from "../../../src/backend-integration";
-import ccI18n from "../../../src/i18n";
+import { waitForCcI18n } from "../../waitForCcI18n";
 
 /**
  * Registers what every test file of this unit needs: jsdom's missing matchMedia and
@@ -66,7 +66,7 @@ export const setupPageTests = () => {
 		if (!Element.prototype.scrollIntoView) {
 			Element.prototype.scrollIntoView = () => {};
 		}
-		await ccI18n.loadNamespaces("translation");
+		await waitForCcI18n();
 	});
 	beforeEach(() => {
 		vi.spyOn(window, "scrollTo").mockImplementation(() => undefined);

@@ -18,6 +18,7 @@ import type ModelRenderParams from "../../src/backend-integration/Model/RenderPa
 import type Visibility from "../../src/backend-integration/Model/Visibility";
 import type { MultiLanguageInputSupportedLanguages } from "../../src/standalone/UIKit/InputControls/MultiLanguageInput";
 import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 
 /**
  * The localized string type (ModelDataTypeLocalizedStringRenderer): its text as
@@ -29,7 +30,7 @@ type LocalizedValue = Partial<
 >;
 
 beforeAll(async () => {
-	await ccI18n.loadNamespaces("translation");
+	await waitForCcI18n();
 });
 
 beforeEach(async () => {

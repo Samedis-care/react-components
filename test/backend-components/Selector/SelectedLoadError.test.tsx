@@ -11,7 +11,7 @@ import React from "react";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Framework } from "../../../src/framework";
-import ccI18n from "../../../src/i18n";
+import { waitForCcI18n } from "../../waitForCcI18n";
 import BackendMultiSelect, {
 	BackendMultiSelectProps,
 } from "../../../src/backend-components/Selector/BackendMultiSelect";
@@ -35,7 +35,7 @@ import { PartialExcept } from "../../../src/utils/distributiveOmit";
 // jsdom does not implement matchMedia, which the Framework's ThemeProvider needs.
 beforeAll(async () => {
 	// the labels a test compares against are the library's translations
-	await ccI18n.init();
+	await waitForCcI18n();
 	if (!window.matchMedia) {
 		window.matchMedia = (query: string) => ({
 			matches: false,

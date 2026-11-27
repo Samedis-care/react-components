@@ -14,6 +14,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { computeAccessibleName } from "dom-accessibility-api";
 import ccI18n, { langs } from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 import FilterEntry, {
 	type IFilterDef,
 } from "../../src/standalone/DataGrid/Content/FilterEntry";
@@ -83,7 +84,7 @@ vi.mock("../../src/utils/isTouchDevice", () => ({ default: () => false }));
 const observers: Array<() => void> = [];
 
 beforeAll(async () => {
-	await ccI18n.init();
+	await waitForCcI18n();
 	await ccI18n.changeLanguage("en");
 	if (!("matchMedia" in window)) {
 		Object.defineProperty(window, "matchMedia", {

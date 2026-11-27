@@ -20,6 +20,7 @@ import {
 import BackendError from "../../../src/backend-integration/Connector/BackendError";
 import MockConnector from "../../../src/stories/test-utils/MockConnector";
 import ccI18n from "../../../src/i18n";
+import { waitForCcI18n } from "../../waitForCcI18n";
 
 // jsdom does not implement matchMedia, which the Framework's ThemeProvider needs.
 beforeAll(async () => {
@@ -35,7 +36,7 @@ beforeAll(async () => {
 			dispatchEvent: () => false,
 		});
 	}
-	await ccI18n.loadNamespaces("translation");
+	await waitForCcI18n();
 });
 
 afterEach(() => {

@@ -10,6 +10,7 @@ import {
 } from "@testing-library/react";
 import { computeAccessibleName } from "dom-accessibility-api";
 import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 import MultiLanguageInput, {
 	MultiLanguageInputProps,
 	MultiLanguageInputSupportedLanguages,
@@ -31,7 +32,7 @@ type Lang = MultiLanguageInputSupportedLanguages;
 beforeAll(async () => {
 	// the language names are a namespace of their own that loads on first use;
 	// loading it here keeps the first render of each test from suspending
-	await ccI18n.loadNamespaces(["translation", "languages"]);
+	await waitForCcI18n(["translation", "languages"]);
 });
 
 afterEach(async () => {

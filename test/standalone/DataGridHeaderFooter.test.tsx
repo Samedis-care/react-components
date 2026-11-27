@@ -23,6 +23,7 @@ import { Refresh, Tune } from "@mui/icons-material";
 import type { SvgIconComponent } from "@mui/icons-material";
 import { computeAccessibleName } from "dom-accessibility-api";
 import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 import DataGrid, {
 	DataGridCustomDataActionButton,
 	DataGridData,
@@ -75,7 +76,7 @@ const resizeTo = (width: number) =>
 	});
 
 beforeAll(async () => {
-	await ccI18n.init();
+	await waitForCcI18n();
 	await ccI18n.changeLanguage("en");
 	Object.defineProperty(window, "matchMedia", {
 		configurable: true,

@@ -15,6 +15,7 @@ import MultiImage, {
 	MultiImageProps,
 } from "../../src/standalone/FileUpload/MultiImage/MultiImage";
 import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 
 // jsdom has no canvas, so the image pipeline itself is replaced; what is tested here is
 // when MultiImage processes files and what it does with the result
@@ -24,7 +25,7 @@ vi.mock("../../src/utils/processImage", () => ({ default: processImageMock }));
 afterEach(cleanup);
 
 beforeAll(async () => {
-	await ccI18n.init();
+	await waitForCcI18n();
 	// jsdom has no layout, so it ships no Element.scrollTo — ImageBox centers its
 	// swipe pane with one on mount.
 	(Element.prototype as unknown as { scrollTo: unknown }).scrollTo ??= () =>

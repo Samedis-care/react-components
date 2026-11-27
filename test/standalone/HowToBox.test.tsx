@@ -6,6 +6,7 @@ import i18next, { Resource } from "i18next";
 import HowToBox, { HowToBoxTranslate } from "../../src/standalone/HowToBox";
 import GroupBox from "../../src/standalone/GroupBox";
 import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 
 afterEach(() => {
 	cleanup();
@@ -13,11 +14,10 @@ afterEach(() => {
 });
 
 // HowToBox suspends until the components-care "translation" namespace is
-// loaded. ccI18n.init() alone does not load it under vitest (initAsync), and a
-// suspended first render leaves the container empty whatever the props are,
-// so every "renders nothing" assertion would pass vacuously.
+// loaded, and a suspended first render leaves the container empty whatever the
+// props are, so every "renders nothing" assertion would pass vacuously.
 beforeAll(async () => {
-	await ccI18n.loadNamespaces("translation");
+	await waitForCcI18n();
 	expect(ccI18n.hasLoadedNamespace("translation")).toBe(true);
 });
 

@@ -8,6 +8,7 @@ import {
 } from "vitest";
 import { act, renderHook } from "@testing-library/react";
 import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 import countries from "../../src/assets/data/countries.json";
 import countryNamesDe from "../../src/assets/i18n/de/countries.json";
 import countryNamesEn from "../../src/assets/i18n/en/countries.json";
@@ -83,8 +84,8 @@ const unsorted = (labels: string[], locale: string): string[] => {
 };
 
 beforeAll(async () => {
+	await waitForCcI18n(["translation", "countries"]);
 	await ccI18n.changeLanguage("de-DE");
-	await ccI18n.loadNamespaces(["translation", "countries"]);
 	await ccI18n.loadLanguages(["en"]);
 });
 afterAll(async () => {

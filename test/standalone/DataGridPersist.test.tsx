@@ -25,6 +25,7 @@ import {
 } from "@testing-library/react";
 import { createTheme, ThemeProvider } from "@mui/material";
 import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 import DataGrid, {
 	DataGridData,
 	DataGridProps,
@@ -80,7 +81,7 @@ vi.mock("../../src/standalone/Virtualized/MultiGrid", () => ({
 }));
 
 beforeAll(async () => {
-	await ccI18n.init();
+	await waitForCcI18n();
 	await ccI18n.changeLanguage("en");
 	// jsdom has neither; MUI's useMediaQuery and the grid's layout need them
 	if (!("matchMedia" in window)) {

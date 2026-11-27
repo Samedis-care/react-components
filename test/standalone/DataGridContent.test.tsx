@@ -15,6 +15,7 @@ import {
 	computeAccessibleName,
 } from "dom-accessibility-api";
 import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 import DataGrid, {
 	DataGridData,
 	DataGridProps,
@@ -48,7 +49,7 @@ vi.mock("react-virtualized-auto-sizer", () => ({
 }));
 
 beforeAll(async () => {
-	await ccI18n.init();
+	await waitForCcI18n();
 	await ccI18n.changeLanguage("en");
 	// jsdom has neither; MUI's useMediaQuery and the filter bar need them
 	if (!("matchMedia" in window)) {

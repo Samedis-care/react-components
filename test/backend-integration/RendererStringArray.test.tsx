@@ -12,6 +12,7 @@ import RendererStringArray, {
 } from "../../src/backend-integration/Model/Types/Renderers/UIKit/RendererStringArray";
 import type ModelRenderParams from "../../src/backend-integration/Model/RenderParams";
 import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 
 /**
  * The UIKit string list renderer (ModelDataTypeStringArrayRendererCC): one text field per
@@ -20,7 +21,7 @@ import ccI18n from "../../src/i18n";
  */
 
 beforeAll(async () => {
-	await ccI18n.loadNamespaces("translation");
+	await waitForCcI18n();
 });
 
 afterEach(async () => {

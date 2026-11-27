@@ -18,6 +18,7 @@ import usePageTitle from "../../src/standalone/Routes/usePageTitle";
 import type { DocumentTitleFormatter } from "../../src/standalone/Routes/DocumentTitle";
 import { Framework } from "../../src/framework";
 import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 
 // The document title: usePageTitle and HistoryRouter's formatDocumentTitle.
 // The app title is the document's title when the router mounts (the <title>
@@ -402,7 +403,7 @@ describe("Framework", () => {
 				dispatchEvent: () => false,
 			});
 		}
-		await ccI18n.init();
+		await waitForCcI18n();
 		await ccI18n.changeLanguage("en-US");
 	});
 	afterAll(async () => {

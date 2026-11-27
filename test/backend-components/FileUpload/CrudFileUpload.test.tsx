@@ -11,6 +11,7 @@ import {
 import { Framework } from "../../../src/framework";
 import type { GetDefaultThemeCallback } from "../../../src/framework/ThemeProvider";
 import ccI18n from "../../../src/i18n";
+import { waitForCcI18n } from "../../waitForCcI18n";
 import CrudFileUpload, {
 	BackendFileMeta,
 	CrudFileUploadProps,
@@ -37,7 +38,7 @@ import { useFileActionButtonFocus } from "../../../src/standalone/FileUpload";
 // jsdom does not implement matchMedia, which the Framework's ThemeProvider needs.
 beforeAll(async () => {
 	// the messages a test compares against are the library's translations
-	await ccI18n.init();
+	await waitForCcI18n();
 	if (!window.matchMedia) {
 		window.matchMedia = (query: string) => ({
 			matches: false,

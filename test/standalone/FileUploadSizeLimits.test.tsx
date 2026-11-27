@@ -11,6 +11,7 @@ import React from "react";
 import { act, cleanup, render } from "@testing-library/react";
 import { Framework } from "../../src/framework";
 import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 import FileUpload, {
 	FileData,
 	FileMeta,
@@ -35,7 +36,7 @@ beforeAll(async () => {
 			dispatchEvent: () => false,
 		});
 	}
-	await ccI18n.init();
+	await waitForCcI18n();
 	await ccI18n.changeLanguage("en-US");
 });
 

@@ -8,11 +8,11 @@ import {
 } from "../../src/backend-integration";
 import { validatePresence } from "../../src/utils/validations";
 import MockConnector from "../../src/stories/test-utils/MockConnector";
-import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 
 beforeAll(async () => {
 	// validatePresence looks its message up by name
-	await ccI18n.loadNamespaces("translation");
+	await waitForCcI18n();
 });
 
 let modelCounter = 0;

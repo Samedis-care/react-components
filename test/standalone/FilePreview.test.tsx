@@ -14,19 +14,14 @@ import { ThemeProvider, createTheme } from "@mui/material";
 import FilePreview, {
 	FileProps,
 } from "../../src/standalone/FileUpload/Generic/File";
-import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 
 const theme = createTheme();
 
 // FilePreview names its remove and restore buttons in the library's language and
-// suspends (renders nothing) until it has loaded. src/i18n.ts starts that load on import:
-// wait for it. A second init() would not: while the first load still runs (on a busy
-// machine), its promise resolves at once and it swaps in an empty resource store.
+// suspends (renders nothing) until it has loaded
 beforeAll(async () => {
-	if (!ccI18n.isInitialized) {
-		await new Promise((resolve) => ccI18n.once("initialized", resolve));
-	}
-	await ccI18n.loadNamespaces("translation");
+	await waitForCcI18n();
 });
 
 afterEach(() => {

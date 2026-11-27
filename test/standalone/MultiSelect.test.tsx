@@ -18,6 +18,7 @@ import MultiSelect, {
 	MultiSelectProps,
 } from "../../src/standalone/Selector/MultiSelect";
 import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 import MultiSelectEntry, {
 	MultiSelectEntryProps,
 } from "../../src/standalone/Selector/MultiSelectEntry";
@@ -31,7 +32,7 @@ import {
 vi.mock("../../src/utils/isTouchDevice", () => ({ default: () => false }));
 
 beforeAll(async () => {
-	await ccI18n.loadNamespaces("translation");
+	await waitForCcI18n();
 });
 
 afterEach(async () => {

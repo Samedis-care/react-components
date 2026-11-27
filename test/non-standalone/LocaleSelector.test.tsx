@@ -27,6 +27,7 @@ import DialogContextProvider, {
 	useDialogContext,
 } from "../../src/framework/DialogContextProvider";
 import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 // Dialog/Utils must come before the component modules: importing the Dialog
 // index first runs into an import cycle
 import "../../src/non-standalone/Dialog/Utils";
@@ -65,8 +66,8 @@ beforeAll(async () => {
 		unobserve() {}
 		disconnect() {}
 	};
+	await waitForCcI18n(["translation", "locale-switcher"]);
 	await ccI18n.changeLanguage("en-US");
-	await ccI18n.loadNamespaces(["translation", "locale-switcher"]);
 });
 beforeEach(() => {
 	setFrameworkHistory(createMemoryHistory());

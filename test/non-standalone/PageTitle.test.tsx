@@ -20,6 +20,7 @@ import FullFormDialog from "../../src/backend-components/Form/FormDialog";
 import useSetFormDialogTitle from "../../src/backend-components/Form/useSetFormDialogTitle";
 import { Framework } from "../../src/framework";
 import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 
 // PageTitle: the page's heading, which names the document (through
 // usePageTitle) or, inside a FullFormDialog, becomes the dialog's title.
@@ -41,7 +42,7 @@ beforeAll(async () => {
 			dispatchEvent: () => false,
 		});
 	}
-	await ccI18n.init();
+	await waitForCcI18n();
 	await ccI18n.changeLanguage("en-US");
 });
 afterAll(async () => {

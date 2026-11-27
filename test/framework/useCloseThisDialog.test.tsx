@@ -23,10 +23,10 @@ import DialogContextProvider, {
 	useDialogContext,
 } from "../../src/framework/DialogContextProvider";
 import { useCloseThisDialog } from "../../src/framework/PushedDialogCloseContext";
-import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 
 beforeAll(async () => {
-	await ccI18n.loadNamespaces("translation");
+	await waitForCcI18n();
 });
 beforeEach(() => {
 	setFrameworkHistory(createMemoryHistory());

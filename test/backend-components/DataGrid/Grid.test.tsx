@@ -38,6 +38,7 @@ import { RowLabelContext } from "../../../src/standalone/DataGrid/Content/RowLab
 import BackendError from "../../../src/backend-integration/Connector/BackendError";
 import MockConnector from "../../../src/stories/test-utils/MockConnector";
 import ccI18n from "../../../src/i18n";
+import { waitForCcI18n } from "../../waitForCcI18n";
 
 // MultiGrid draws the cells; without it the header, the footer and the loads remain,
 // which is what the grid-level tests here look at. The cells are rendered from the
@@ -65,7 +66,7 @@ beforeAll(async () => {
 		unobserve() {}
 		disconnect() {}
 	} as never;
-	await ccI18n.loadNamespaces("translation");
+	await waitForCcI18n();
 });
 
 afterEach(() => {

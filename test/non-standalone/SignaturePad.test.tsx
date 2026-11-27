@@ -24,7 +24,7 @@ import { setFrameworkHistory } from "../../src/framework/History";
 import DialogContextProvider, {
 	useDialogContext,
 } from "../../src/framework/DialogContextProvider";
-import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 import { createTheme, Theme, ThemeProvider } from "@mui/material";
 
 import SignaturePad from "../../src/non-standalone/SignaturePad/SignaturePad";
@@ -76,7 +76,7 @@ const SIG =
 
 beforeAll(async () => {
 	setFrameworkHistory(createMemoryHistory());
-	await ccI18n.loadNamespaces("translation");
+	await waitForCcI18n();
 });
 
 beforeEach(() => {

@@ -3,6 +3,7 @@ import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import SignPad from "../../src/standalone/SignPad";
 import ccI18n, { langs } from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 import userEvent from "@testing-library/user-event";
 import { ThemeProvider, createTheme } from "@mui/material";
 
@@ -13,7 +14,7 @@ afterEach(() => {
 
 // SignPad suspends until the components-care "translation" namespace is loaded
 beforeAll(async () => {
-	await ccI18n.loadNamespaces("translation");
+	await waitForCcI18n();
 	expect(ccI18n.hasLoadedNamespace("translation")).toBe(true);
 });
 

@@ -16,6 +16,7 @@ import RendererFiles from "../../src/backend-integration/Model/Types/Renderers/R
 import type ModelRenderParams from "../../src/backend-integration/Model/RenderParams";
 import type { FileData } from "../../src/standalone/FileUpload/Generic";
 import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 
 /**
  * The files renderer (ModelDataTypeFilesRenderer) in a grid cell: one line, without a
@@ -23,7 +24,7 @@ import ccI18n from "../../src/i18n";
  */
 
 beforeAll(async () => {
-	await ccI18n.loadNamespaces("translation");
+	await waitForCcI18n();
 	await ccI18n.loadLanguages(["ru"]);
 });
 

@@ -1,5 +1,6 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 import {
 	validateLocalized,
 	validateLocalizedPresence,
@@ -11,8 +12,8 @@ import {
 import type { MultiLanguageInputSupportedLanguages } from "../../src/standalone/UIKit/InputControls/MultiLanguageInput";
 
 beforeAll(async () => {
+	await waitForCcI18n();
 	await ccI18n.changeLanguage("en");
-	await ccI18n.loadNamespaces("translation");
 });
 
 type Localized = Partial<Record<MultiLanguageInputSupportedLanguages, string>>;

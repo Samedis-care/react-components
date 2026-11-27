@@ -32,7 +32,7 @@ import {
 } from "../../src/framework/PushedDialogCloseContext";
 import type { PushedDialogClose } from "../../src";
 import FormDialog from "../../src/backend-components/Form/FormDialog";
-import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 import HistoryRouter from "../../src/standalone/Routes/HistoryRouter";
 import Routes from "../../src/standalone/Routes/Routes";
 import Route from "../../src/standalone/Routes/Route";
@@ -40,7 +40,7 @@ import Link from "../../src/standalone/Routes/Link";
 
 let history: MemoryHistory;
 beforeAll(async () => {
-	await ccI18n.loadNamespaces("translation");
+	await waitForCcI18n();
 });
 beforeEach(() => {
 	history = createMemoryHistory();

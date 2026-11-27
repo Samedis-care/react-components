@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import React from "react";
 import { createTheme } from "@mui/material";
 import TypeColor from "../../src/backend-integration/Model/Types/TypeColor";
-import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 
 // the type is abstract only because of render(): the validation under test
 // lives entirely in the base class
@@ -17,7 +17,7 @@ const type = new TestTypeColor();
 const MESSAGE = "Please enter a valid color, such as #336699";
 
 beforeAll(async () => {
-	await ccI18n.loadNamespaces("translation");
+	await waitForCcI18n();
 });
 
 /** The colors a theme palette reads, in each format a user may type or a server may store */

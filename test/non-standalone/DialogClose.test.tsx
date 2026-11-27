@@ -24,7 +24,7 @@ import DialogContextProvider, {
 	DialogContextType,
 	useDialogContext,
 } from "../../src/framework/DialogContextProvider";
-import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 // Dialog/Utils must come before the component modules: importing the Dialog
 // index first runs into an import cycle
 import {
@@ -42,7 +42,7 @@ import type { IDialogButtonConfig } from "../../src/non-standalone/Dialog/Types"
 
 let history: MemoryHistory;
 beforeAll(async () => {
-	await ccI18n.loadNamespaces("translation");
+	await waitForCcI18n();
 });
 beforeEach(() => {
 	history = createMemoryHistory();

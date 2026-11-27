@@ -25,6 +25,7 @@ import LazyConnector from "../../../src/backend-integration/Connector/LazyConnec
 import type ApiConnector from "../../../src/backend-integration/Connector/ApiConnector";
 import { CcErrorNames } from "../../../src/framework/ErrorReporting";
 import ccI18n from "../../../src/i18n";
+import { waitForCcI18n } from "../../waitForCcI18n";
 
 // jsdom has no canvas, so the image pipeline itself is replaced (as in
 // test/standalone/MultiImage.test.tsx): a picked file is used as it is
@@ -34,7 +35,7 @@ vi.mock("../../../src/utils/processImage", () => ({
 }));
 
 beforeAll(async () => {
-	await ccI18n.init();
+	await waitForCcI18n();
 	// jsdom does not implement matchMedia, which the Framework's ThemeProvider needs
 	if (!window.matchMedia) {
 		window.matchMedia = (query: string) => ({

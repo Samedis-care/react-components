@@ -6,9 +6,10 @@ import ImagePreviewDialog, {
 	ImagePreviewDialogProps,
 } from "../../src/standalone/FileUpload/Image/ImagePreviewDialog";
 import ccI18n, { langs } from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 
 beforeAll(async () => {
-	await ccI18n.init();
+	await waitForCcI18n();
 });
 
 afterEach(() => {

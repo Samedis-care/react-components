@@ -10,10 +10,11 @@ import {
 } from "@testing-library/react";
 import { Dialog, ThemeProvider, createTheme } from "@mui/material";
 import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 import { DialogTitle } from "../../src/non-standalone/Dialog/DialogTitle";
 
 beforeAll(async () => {
-	await ccI18n.loadNamespaces("translation");
+	await waitForCcI18n();
 });
 afterEach(() => {
 	cleanup();
