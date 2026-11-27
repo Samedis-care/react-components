@@ -23,6 +23,7 @@ import type { SvgIconComponent } from "@mui/icons-material";
 import { computeAccessibleName } from "dom-accessibility-api";
 import ccI18n from "../../src/i18n";
 import DataGrid, {
+	DataGridCustomDataActionButton,
 	DataGridData,
 	DataGridProps,
 	DataGridRowData,
@@ -313,6 +314,164 @@ describe("footer actions", () => {
 		expect(document.querySelector("[aria-busy=true]")).toBeNull();
 		fireEvent.click(del);
 		expect(onDelete).toHaveBeenCalledOnce();
+	});
+
+	it("[ISSUE-3495-ITEM-7] Edit does not throw when the one selected row of a select all is not loaded", async () => {
+		const onEdit = vi.fn();
+		// pages of 2 of 3 rows: only page 1 is loaded (MultiGrid is mocked)
+		const loadData = () => ({ rowsTotal: 3, rows: ROWS });
+		const errors: unknown[] = [];
+		const onWindowError = (event: ErrorEvent) => {
+			errors.push(event.error);
+			event.preventDefault();
+		};
+		window.addEventListener("error", onWindowError);
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		try {
+			render(
+				<Grid
+					loadData={loadData}
+					rowsPerPage={2}
+					enableSelectAll
+					onEdit={onEdit}
+				/>,
+			);
+			await idle();
+			// both loaded rows unticked: the one selected row is row 3
+			select(["1", "2"], true);
+			const edit = screen.getByRole("button", { name: "Edit" });
+			try {
+				fireEvent.click(edit);
+			} catch (e) {
+				errors.push(e);
+			}
+		} finally {
+			window.removeEventListener("error", onWindowError);
+		}
+		expect(errors.map(String)).toEqual([]);
+	});
+
+	it("[ISSUE-3495-ITEM-7] the selection count passed to the actions is never negative after a failed reload", async () => {
+		let fail = false;
+		const loadData = vi.fn(() =>
+			fail ? Promise.reject(new Error("down")) : Promise.resolve(ok()),
+		);
+		// enabled for any count, so the click reaches onClick
+		const isDisabled = vi.fn<DataGridCustomDataActionButton["isDisabled"]>(
+			() => false,
+		);
+		const onClick = vi.fn<DataGridCustomDataActionButton["onClick"]>();
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		render(
+			<Grid
+				loadData={loadData}
+				enableSelectAll
+				customDataActionButtons={[
+					{
+						icon: null,
+						label: "Act",
+						isDisabled,
+						supportsSelectAll: true,
+						onClick,
+					},
+				]}
+			/>,
+		);
+		await idle();
+		select(["1"], true);
+		fail = true;
+		await openMenu("Reset", "Refresh");
+		await idle();
+		await waitFor(() => expect(probe!.state.dataLoadError).not.toBeNull());
+		fireEvent.click(screen.getByRole("button", { name: "Act" }));
+		expect(
+			Math.min(...isDisabled.mock.calls.map(([numSelected]) => numSelected)),
+		).toBeGreaterThanOrEqual(0);
+		expect(onClick.mock.calls.at(-1)?.[2].count).toBeGreaterThanOrEqual(0);
+	});
+
+	it("[ISSUE-3495-ITEM-7] after a failed reload nothing counts as selected: Edit, Delete of a select all and an action disabled for none are unavailable", async () => {
+		let fail = false;
+		const loadData = vi.fn(() =>
+			fail ? Promise.reject(new Error("down")) : Promise.resolve(ok()),
+		);
+		const onDelete = vi.fn();
+		const onClick = vi.fn();
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		render(
+			<Grid
+				loadData={loadData}
+				enableSelectAll
+				enableDeleteAll
+				onDelete={onDelete}
+				onEdit={vi.fn()}
+				customDataActionButtons={[
+					{
+						icon: null,
+						label: "Act",
+						isDisabled: (n) => n === 0,
+						supportsSelectAll: true,
+						onClick,
+					},
+				]}
+			/>,
+		);
+		await idle();
+		// everything but row 1: row 2 is the one selected row
+		select(["1"], true);
+		const edit = screen.getByRole("button", { name: "Edit" });
+		const del = screen.getByRole("button", { name: "Delete" });
+		const custom = screen.getByRole("button", { name: "Act" });
+		expect(edit).toBeEnabled();
+		expect(del).not.toHaveAttribute("aria-disabled");
+		expect(custom).toBeEnabled();
+
+		fail = true;
+		await openMenu("Reset", "Refresh");
+		await idle();
+		await waitFor(() => expect(probe!.state.dataLoadError).not.toBeNull());
+		expect(edit).toBeDisabled();
+		expect(del).toHaveAttribute("aria-disabled", "true");
+		expect(custom).toBeDisabled();
+		fireEvent.click(del);
+		fireEvent.click(custom);
+		expect(onDelete).not.toHaveBeenCalled();
+		expect(onClick).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3495-ITEM-7] with select all, Edit is disabled until the one selected row is loaded, then edits that row", async () => {
+		const people: DataGridRowData[] = [
+			...ROWS,
+			{ id: "3", name: "Carol", role: "user" },
+		];
+		const loadData: DataGridProps["loadData"] = ({ page, rows }) => ({
+			rowsTotal: people.length,
+			rows: people.slice((page - 1) * rows, page * rows),
+		});
+		const onEdit = vi.fn();
+		render(
+			<Grid
+				loadData={loadData}
+				rowsPerPage={2}
+				enableSelectAll
+				onEdit={onEdit}
+			/>,
+		);
+		await idle();
+		// both rows of page 1 unticked: the one selected row is row 3, on page 2
+		select(["1", "2"], true);
+		const edit = screen.getByRole("button", { name: "Edit" });
+		expect(edit).toBeDisabled();
+		fireEvent.click(edit);
+		expect(onEdit).not.toHaveBeenCalled();
+
+		// the user scrolls down to the second page
+		act(() => probe!.setState((p) => ({ ...p, pages: [0, 1] })));
+		await waitFor(() => expect(Object.keys(probe!.state.rows)).toHaveLength(3));
+		await idle();
+		expect(edit).toBeEnabled();
+		fireEvent.click(edit);
+		expect(onEdit).toHaveBeenCalledExactlyOnceWith("3");
 	});
 });
 

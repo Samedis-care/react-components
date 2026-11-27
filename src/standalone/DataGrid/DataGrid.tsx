@@ -131,6 +131,9 @@ export interface DataGridCustomDataActionButton {
 	 * 										0 => none
 	 * 									  1 => one
 	 * 									  2 => multiple
+	 *                    With select all it is the number of rows matching
+	 *                    the filter minus the ids, capped at 2, and 0 while
+	 *                    the grid has no row count (a load runs or failed).
 	 */
 	isDisabled: (numSelected: 0 | 1 | 2) => boolean;
 	/**
@@ -162,7 +165,9 @@ export interface DataGridSelectionDetails {
 	 */
 	filter: DataGridFilterParameters;
 	/**
-	 * How many rows are selected
+	 * How many rows are selected. With select all: the rows matching the
+	 * filter minus the ids, 0 while the grid has no row count (a load runs or
+	 * failed).
 	 */
 	count: number;
 	/**
@@ -402,7 +407,9 @@ export interface IDataGridColumnProps {
 	 */
 	onAddNew?: (() => void) | string | IDataGridAddButton[];
 	/**
-	 * Edit handler
+	 * Shows Edit in the footer, which calls this with the selected row's id.
+	 * Edit is enabled while exactly one row is selected; with select all,
+	 * only once that row is loaded, as the grid doesn't know its id before.
 	 * @param id The id to edit
 	 */
 	onEdit?: (id: string) => void;

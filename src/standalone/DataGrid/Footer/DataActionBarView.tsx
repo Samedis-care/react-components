@@ -44,6 +44,11 @@ export interface DataActionBarViewProps {
 	 */
 	handleEdit?: React.MouseEventHandler;
 	/**
+	 * Is the edit button disabled? It is unless exactly one row is selected
+	 * and the grid knows its id (with select all: that row is loaded)
+	 */
+	editDisabled: boolean;
+	/**
 	 * Callback for delete button.
 	 * If not defined: Disables delete button
 	 */
@@ -222,7 +227,7 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 						control={
 							<SmallestIconButton
 								color={"primary"}
-								disabled={props.numSelected !== 1}
+								disabled={props.editDisabled}
 								onClick={props.handleEdit}
 								aria-label={myEditLabel}
 							>
@@ -231,7 +236,7 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 						}
 						labelText={myEditLabel}
 						labelPlacement={"bottom"}
-						disabled={props.numSelected !== 1}
+						disabled={props.editDisabled}
 					/>
 				</>
 			)}

@@ -31,22 +31,27 @@ const DataActionBar = () => {
 	const { label: selectAllLabel, disabled: selectAllDisabled } =
 		useDataGridSelectAll();
 
+	// with select all the rows matching the filter minus the ids: 0, not
+	// negative, while the grid has no row count (a load runs or failed)
 	const numSelected = selectAll
-		? (state.rowsFiltered ?? state.rowsTotal) - selectedRows.length
+		? Math.max((state.rowsFiltered ?? state.rowsTotal) - selectedRows.length, 0)
 		: selectedRows.length;
 
-	const firstSelection = selectAll
-		? Object.values(state.rows).find((row) => !selectedRows.includes(row.id))
-				?.id
-		: selectedRows[0];
+	// the one selected row's id, for Edit. With select all it is the loaded
+	// row that is not an exception: while that row is not loaded, the grid
+	// doesn't know it, and Edit is disabled
+	const editId =
+		numSelected !== 1
+			? undefined
+			: selectAll
+				? Object.values(state.rows).find(
+						(row) => !selectedRows.includes(row.id),
+					)?.id
+				: selectedRows[0];
 	const handleEdit = useCallback(() => {
-		if (numSelected !== 1) return;
-		if (!firstSelection)
-			throw new Error(
-				"Calling handleEdit without selection? This shouldn't happen.",
-			);
-		if (onEdit) onEdit(firstSelection);
-	}, [numSelected, onEdit, firstSelection]);
+		if (editId === undefined) return;
+		if (onEdit) onEdit(editId);
+	}, [onEdit, editId]);
 
 	const handleDelete = useCallback(async () => {
 		if (numSelected === 0) return;
@@ -125,6 +130,7 @@ const DataActionBar = () => {
 			numSelected={Math.min(numSelected, 2) as 0 | 1 | 2}
 			selectAll={selectAll}
 			handleEdit={onEdit ? handleEdit : undefined}
+			editDisabled={editId === undefined}
 			handleDelete={onDelete ? handleDelete : undefined}
 			deleting={!!deleting}
 			enableDeleteAll={!!enableDeleteAll}
