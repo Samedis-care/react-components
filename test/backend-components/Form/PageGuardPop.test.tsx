@@ -39,8 +39,51 @@ import {
 } from "./pageFixture";
 
 // Browser Back is a POP navigation, which only a browser history reverts and retries
-// asynchronously; this file uses jsdom's window history, so it stays on its own.
+// asynchronously, and only a browser history keeps its location percent-encoded; this file
+// uses jsdom's window history, so it stays on its own.
 setupPageTests();
+
+const FieldPage = makePage();
+
+/**
+ * Mounts the field page in a Form (record "1") as the element of a Route with this path,
+ * under a browser history (jsdom's window history) at the start location
+ * @returns The history, and a cleanup that unmounts and restores the window's location
+ */
+const mountBrowserRoutedPage = (path: string, start: string) => {
+	const startUrl = window.location.pathname;
+	window.history.replaceState(null, "", start);
+	const history = createBrowserHistory();
+	setFrameworkHistory(history);
+	const { unmount } = render(
+		<Framework>
+			<Routes>
+				{[
+					<Route
+						key="page"
+						path={path}
+						element={
+							<Form
+								model={makePeopleModel()}
+								id={"1"}
+								errorComponent={DefaultErrorComponent}
+								customProps={{ goBack: () => {} }}
+							>
+								{FieldPage}
+							</Form>
+						}
+					/>,
+				]}
+			</Routes>
+		</Framework>,
+	);
+	const cleanup = async () => {
+		unmount();
+		await wait(20);
+		window.history.replaceState(null, "", startUrl);
+	};
+	return { history, cleanup };
+};
 
 /**
  * A record page with routed tabs inside it (SCF TenantContractForm, IMF RoleForm)
@@ -245,6 +288,48 @@ describe("Form page leave guard with the browser history", () => {
 			unmount();
 			await wait(20);
 			window.history.replaceState(null, "", startUrl);
+		}
+	});
+
+	it("[ISSUE-3503-ITEM-31] a dirty form page at an encoded url (/%C3%BCber/1) lets a navigation to the page written as text (/über/1/tab2) through, and asks before another record", async () => {
+		const { history, cleanup } = mountBrowserRoutedPage(
+			"/über/:id/*",
+			"/%C3%BCber/1",
+		);
+		try {
+			await makeDirty();
+			act(() => history.push("/über/1/tab2"));
+			await act(async () => {});
+			expect(leavePrompts()).toHaveLength(0);
+			expect(window.location.pathname).toBe("/%C3%BCber/1/tab2");
+			expect(screen.getByDisplayValue("AliceX")).toBeInTheDocument();
+
+			act(() => history.push("/über/2"));
+			expect(await findLeavePrompt()).toBeInTheDocument();
+			expect(window.location.pathname).toBe("/%C3%BCber/1/tab2");
+		} finally {
+			await cleanup();
+		}
+	});
+
+	it("[ISSUE-3503-ITEM-31] a dirty form page of an id with a space (/rec/a%20b) lets a path built from the decoded id (/rec/a b/more) through, and asks before another id", async () => {
+		const { history, cleanup } = mountBrowserRoutedPage(
+			"/rec/:id/*",
+			"/rec/a%20b",
+		);
+		try {
+			await makeDirty();
+			act(() => history.push("/rec/a b/more"));
+			await act(async () => {});
+			expect(leavePrompts()).toHaveLength(0);
+			expect(window.location.pathname).toBe("/rec/a%20b/more");
+			expect(screen.getByDisplayValue("AliceX")).toBeInTheDocument();
+
+			act(() => history.push("/rec/a c"));
+			expect(await findLeavePrompt()).toBeInTheDocument();
+			expect(window.location.pathname).toBe("/rec/a%20b/more");
+		} finally {
+			await cleanup();
 		}
 	});
 });

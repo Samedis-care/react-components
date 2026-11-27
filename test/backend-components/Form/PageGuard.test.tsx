@@ -145,6 +145,18 @@ describe("Form page leave guard", () => {
 		expect(leavePrompts()).toHaveLength(1);
 	});
 
+	it("[ISSUE-3503-ITEM-31] a dirty form page at a url written as text (/über/1) lets an encoded navigation to it (/%C3%BCber/1/more) through, and asks before another record", async () => {
+		const history = mountRoutedPage("/über/:id/*", "/über/1");
+		await makeDirty();
+		await navigate("/%C3%BCber/1/more");
+		expect(leavePrompts()).toHaveLength(0);
+		expect(history.location.pathname).toBe("/%C3%BCber/1/more");
+		expect(screen.getByDisplayValue("AliceX")).toBeInTheDocument();
+		await navigate("/%C3%BCber/2");
+		expect(history.location.pathname).toBe("/%C3%BCber/1/more");
+		expect(leavePrompts()).toHaveLength(1);
+	});
+
 	it("[ISSUE-3503-ITEM-2] a form page on the root route / asks before leaving it", async () => {
 		const history = mountRoutedPage("/", "/");
 		await makeDirty();
