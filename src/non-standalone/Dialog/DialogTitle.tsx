@@ -1,5 +1,6 @@
 import React, { useCallback } from "react";
 import {
+	buttonBaseClasses,
 	DialogTitle as MuiDialogTitle,
 	dialogContentClasses,
 	IconButton,
@@ -9,6 +10,7 @@ import {
 import { Close } from "@mui/icons-material";
 import combineClassNames from "../../utils/combineClassNames";
 import useCCTranslations from "../../utils/useCCTranslations";
+import focusRing from "../../utils/internal/focusRing";
 
 /**
  * Props of DialogTitle; theme defaults come from
@@ -126,6 +128,9 @@ const CloseButton = styled(IconButton, {
 	color: theme.palette.grey[500],
 	padding: `calc(${theme.spacing(1)} / 2)`,
 	zIndex: 1,
+	// a focus ring around the circle, as on FullFormDialog's open-in-new button
+	// beside it: the focus ripple alone is too faint, and forced colors drop it
+	[`&.${buttonBaseClasses.focusVisible}`]: focusRing(theme, 0),
 }));
 
 // the action and the close button, which stays beside it when the action

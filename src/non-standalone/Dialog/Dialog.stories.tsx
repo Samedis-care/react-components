@@ -5,10 +5,15 @@ import { expect, fn, mocked, userEvent, waitFor, within } from "storybook/test";
 import {
 	Box,
 	Button,
+	createTheme,
 	Dialog,
 	DialogContent,
 	DialogContentText,
+	getContrastRatio,
+	paperClasses,
+	Stack,
 	TextField,
+	ThemeProvider,
 	Typography,
 } from "@mui/material";
 import DialogContextProvider from "../../framework/DialogContextProvider";
@@ -120,10 +125,14 @@ export const InfoDialogStory: StoryObj = {
 
 // ─── ConfirmDialog ───────────────────────────────────────────────────────────
 
-const ConfirmDialogDemo = () => {
+interface ConfirmDialogArgs {
+	onYes: () => void;
+	onNo: () => void;
+}
+
+const ConfirmDialogDemo = (props: ConfirmDialogArgs) => {
+	const { onYes, onNo } = props;
 	const [pushDialog] = useDialogContext();
-	const onYes = fn();
-	const onNo = fn();
 	const open = useCallback(() => {
 		pushDialog(
 			<ConfirmDialog
@@ -137,15 +146,20 @@ const ConfirmDialogDemo = () => {
 		);
 	}, [pushDialog, onYes, onNo]);
 	return (
-		<Button variant="contained" color="warning" onClick={open}>
+		<Button variant="contained" color="primary" onClick={open}>
 			Open Confirm Dialog
 		</Button>
 	);
 };
 
-export const ConfirmDialogStory: StoryObj = {
+export const ConfirmDialogStory: StoryObj<ConfirmDialogArgs> = {
 	name: "ConfirmDialog",
-	render: () => <ConfirmDialogDemo />,
+	args: { onYes: fn(), onNo: fn() },
+	argTypes: {
+		onYes: { description: "`handlerButtonYes`: called when Yes is clicked" },
+		onNo: { description: "`handlerButtonNo`: called when No is clicked" },
+	},
+	render: (args) => <ConfirmDialogDemo {...args} />,
 };
 
 // ─── Async button handler ────────────────────────────────────────────────────
@@ -704,6 +718,352 @@ export const Issue3497Item17BusyDialogWithKeyboard: StoryObj<BusyKeyboardArgs> =
 			await expect(no).toHaveFocus();
 		},
 	};
+
+export const Issue3497Item18FocusShowsVisibleRing: StoryObj<ConfirmDialogArgs> =
+	{
+		args: { onYes: fn(), onNo: fn() },
+		parameters: {
+			a11y: { test: "error" },
+			docs: {
+				description: {
+					story:
+						"ISSUE-3497-ITEM-18: Tab to Cancel in a ConfirmDialog. The only focus cue is MUI's 30% ripple (about 1.65:1 for the secondary button), no outline, and nothing at all in forced-colors mode. Expected: a static focus ring of at least 2px and 3:1.",
+				},
+			},
+		},
+		render: (args) => <ConfirmDialogDemo {...args} />,
+		play: async ({ canvas, userEvent: user }) => {
+			await user.click(
+				canvas.getByRole("button", { name: "Open Confirm Dialog" }),
+			);
+			const dialog = await page().findByRole("dialog", {
+				name: "Confirm Action",
+			});
+			const yes = within(dialog).getByRole("button", { name: "Yes, Delete" });
+			const no = within(dialog).getByRole("button", { name: "Cancel" });
+			await waitFor(() => expect(yes).toHaveFocus());
+			await user.tab();
+			await expect(no).toHaveFocus();
+			await waitFor(() => expect(no).toHaveClass("Mui-focusVisible"));
+			const cs = getComputedStyle(no);
+			const ring =
+				(cs.outlineStyle !== "none" && parseFloat(cs.outlineWidth) >= 2) ||
+				cs.boxShadow !== "none";
+			await expect(
+				ring,
+				`outline ${cs.outlineStyle} ${cs.outlineWidth}, box-shadow ${cs.boxShadow}`,
+			).toBe(true);
+		},
+	};
+
+const noop = () => {};
+
+/** The simple dialogs whose buttons and paper ISSUE-3497-ITEM-18 checks */
+const simpleDialogs = [
+	{
+		opener: "Open confirmation",
+		title: "Delete device?",
+		dialog: (
+			<ConfirmDialog
+				title="Delete device?"
+				message="The device and its history are deleted."
+				textButtonYes="Delete"
+				textButtonNo="Cancel"
+				handlerButtonYes={noop}
+				handlerButtonNo={noop}
+			/>
+		),
+	},
+	{
+		opener: "Open input",
+		title: "Rename device",
+		dialog: (
+			<InputDialog
+				title="Rename device"
+				message="Enter the new name of the device."
+				textButtonYes="Rename"
+				textButtonNo="Cancel"
+				textFieldLabel="Name"
+				textFieldValidator={validateName}
+				handlerButtonYes={noop}
+				handlerButtonNo={noop}
+			/>
+		),
+	},
+	{
+		opener: "Open form",
+		title: "Export devices",
+		dialog: (
+			<FormDialog
+				title="Export devices"
+				message="Name the file of the export."
+				inputs={<TextField label="File name" fullWidth />}
+				buttons={[
+					{ text: "Export", autoFocus: true },
+					{ text: "Cancel", color: "secondary" },
+				]}
+			/>
+		),
+	},
+];
+
+const SimpleDialogOpeners = () => (
+	<Stack direction="row" spacing={1}>
+		{simpleDialogs.map((entry) => (
+			<Opener key={entry.opener} label={entry.opener} dialog={entry.dialog} />
+		))}
+	</Stack>
+);
+
+/**
+ * "ok" for a solid outline of at least 2px with 3:1 against the dialog's
+ * paper, else what is there
+ */
+const focusRingOf = (button: Element) => {
+	const cs = getComputedStyle(button);
+	if (cs.outlineStyle !== "solid" || parseFloat(cs.outlineWidth) < 2)
+		return `outline ${cs.outlineStyle} ${cs.outlineWidth}, box-shadow ${cs.boxShadow}`;
+	// getContrastRatio ignores the alpha channel
+	if (cs.outlineColor.startsWith("rgba")) return `outline ${cs.outlineColor}`;
+	const paper = button.closest(`.${paperClasses.root}`);
+	if (!paper) return "no paper around the button";
+	const ratio = getContrastRatio(
+		cs.outlineColor,
+		getComputedStyle(paper).backgroundColor,
+	);
+	return ratio >= 3 ? "ok" : `outline at ${ratio.toFixed(2)}:1`;
+};
+
+/**
+ * Tabs from where the dialog put focus to the first of its two buttons, then
+ * to the second and back. Returns the focus ring of each, by label.
+ */
+const ringsOfDialogButtons = async (
+	dialog: HTMLElement,
+	user: { tab: (options?: { shift?: boolean }) => Promise<void> },
+) => {
+	const [first, second] = within(
+		dialog.querySelector<HTMLElement>(".MuiDialogActions-root") ?? dialog,
+	).getAllByRole("button");
+	await waitFor(() =>
+		expect(dialog).toContainElement(document.activeElement as HTMLElement),
+	);
+	for (let i = 0; i < 3 && document.activeElement !== first; i++)
+		await user.tab();
+	await expect(first).toHaveFocus();
+	const rings: Record<string, string> = {};
+	await user.tab();
+	await expect(second).toHaveFocus();
+	await waitFor(() => expect(second).toHaveClass("Mui-focusVisible"));
+	rings[second.textContent ?? ""] = focusRingOf(second);
+	await user.tab({ shift: true });
+	await expect(first).toHaveFocus();
+	await waitFor(() => expect(first).toHaveClass("Mui-focusVisible"));
+	rings[first.textContent ?? ""] = focusRingOf(first);
+	return rings;
+};
+
+export const Issue3497Item18EveryDialogButtonShowsRing: StoryObj = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3497-ITEM-18: a keyboard-focused button of ConfirmDialog (and so of ErrorDialog and InfoDialog), InputDialog and FormDialog draws a 2px solid outline in `palette.primary.main`, 2px outside the button, as MUI's own ring sits: at least 3:1 against the dialog. Forced-colors mode keeps outlines. MUI's focus ripple stays, and a click shows no ring.",
+			},
+		},
+	},
+	render: () => <SimpleDialogOpeners />,
+	play: async ({ canvas, userEvent: user }) => {
+		const rings: Record<string, Record<string, string>> = {};
+		for (const { opener, title } of simpleDialogs) {
+			await user.click(canvas.getByRole("button", { name: opener }));
+			const dialog = await page().findByRole("dialog", { name: title });
+			rings[title] = await ringsOfDialogButtons(dialog, user);
+			await user.keyboard("{Escape}");
+			await waitFor(() => expect(page().queryByRole("dialog")).toBeNull());
+		}
+		await expect(rings, "focus ring of each dialog button").toEqual({
+			"Delete device?": { Delete: "ok", Cancel: "ok" },
+			"Rename device": { Cancel: "ok", Rename: "ok" },
+			"Export devices": { Export: "ok", Cancel: "ok" },
+		});
+	},
+};
+
+/** `width style color` of the border of `element`, or of each side when they differ */
+const borderOf = (element: Element) => {
+	const cs = getComputedStyle(element);
+	const sides = ["Top", "Right", "Bottom", "Left"].map((side) =>
+		["Width", "Style", "Color"]
+			.map((part) => cs.getPropertyValue(`border-${side}-${part}`))
+			.join(" "),
+	);
+	return new Set(sides).size === 1 ? sides[0] : sides.join(" / ");
+};
+
+/**
+ * The border of `element` in forced colors, as far as the page's styles give
+ * it one: the rules of every `@media (forced-colors: active)` block are
+ * applied as if it matched. The browser's own forcing of colors is not
+ * emulated.
+ */
+const forcedColorsBorderOf = (element: Element) => {
+	const rules = Array.from(document.styleSheets)
+		.flatMap((sheet) => {
+			try {
+				return Array.from(sheet.cssRules);
+			} catch {
+				// a cross-origin sheet
+				return [];
+			}
+		})
+		.filter(
+			(rule): rule is CSSMediaRule =>
+				rule instanceof CSSMediaRule &&
+				rule.media.mediaText.includes("forced-colors: active"),
+		)
+		.flatMap((rule) => Array.from(rule.cssRules, (inner) => inner.cssText));
+	const sheet = document.createElement("style");
+	sheet.textContent = rules.join("\n");
+	document.head.append(sheet);
+	try {
+		return borderOf(element);
+	} finally {
+		sheet.remove();
+	}
+};
+
+/** A CSS system color, as getComputedStyle resolves it */
+const systemColor = (name: string) => {
+	const probe = document.createElement("div");
+	probe.style.color = name;
+	document.body.append(probe);
+	try {
+		return getComputedStyle(probe).color;
+	} finally {
+		probe.remove();
+	}
+};
+
+export const Issue3497Item18PaperHasEdgeInForcedColors: StoryObj = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3497-ITEM-18: forced-colors mode drops the paper's shadow, so the paper of ConfirmDialog (and ErrorDialog, InfoDialog), InputDialog and FormDialog draws a 1px `CanvasText` border there, and the dialog keeps its edge over the page. Without forced colors the paper has no border.",
+			},
+		},
+	},
+	render: () => <SimpleDialogOpeners />,
+	play: async ({ canvas, userEvent: user }) => {
+		const edges: Record<string, { normal: string; forced: string }> = {};
+		for (const { opener, title } of simpleDialogs) {
+			await user.click(canvas.getByRole("button", { name: opener }));
+			const dialog = await page().findByRole("dialog", { name: title });
+			edges[title] = {
+				normal: getComputedStyle(dialog).borderTopStyle,
+				forced: forcedColorsBorderOf(dialog),
+			};
+			await user.keyboard("{Escape}");
+			await waitFor(() => expect(page().queryByRole("dialog")).toBeNull());
+		}
+		const edge = {
+			normal: "none",
+			forced: `1px solid ${systemColor("CanvasText")}`,
+		};
+		await expect(edges, "border of each dialog's paper").toEqual({
+			"Delete device?": edge,
+			"Rename device": edge,
+			"Export devices": edge,
+		});
+	},
+};
+
+export const Issue3497Item18CloseButtonShowsRing: StoryObj<DialogTitleArgs> = {
+	args: { onClose: fn() },
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3497-ITEM-18: the keyboard-focused close button of DialogTitle draws a 2px ring in `palette.primary.main` around its circle, as FullFormDialog's open-in-new button beside it does, at least 3:1 against the dialog.",
+			},
+		},
+	},
+	render: (args) => (
+		<Dialog open>
+			<DialogTitle onClose={args.onClose}>Device details</DialogTitle>
+			<DialogContent>
+				<DialogContentText>Serial number 4711.</DialogContentText>
+			</DialogContent>
+		</Dialog>
+	),
+	play: async ({ userEvent: user }) => {
+		const dialog = await page().findByRole("dialog", {
+			name: "Device details",
+		});
+		await waitFor(() => expect(dialog).toBeVisible());
+		const close = within(dialog).getByRole("button", { name: "Close" });
+		await user.tab();
+		await expect(close).toHaveFocus();
+		await waitFor(() => expect(close).toHaveClass("Mui-focusVisible"));
+		await expect(focusRingOf(close), "focus ring of the close button").toBe(
+			"ok",
+		);
+	},
+};
+
+/** A theme with a ring of its own: 3px in purple */
+const themeRingTheme = createTheme({
+	focusVisible: { outlineColor: "#9c27b0", outlineWidth: "3px" },
+});
+
+export const Issue3497Item18KeepsThemeFocusRing: StoryObj<ConfirmDialogArgs> = {
+	args: { onYes: fn(), onNo: fn() },
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3497-ITEM-18: with the theme's `focusVisible` option MUI draws the theme's ring (here 3px in purple) on the dialog buttons, and the dialog adds none of its own. The close button of DialogTitle leaves it to the theme the same way.",
+			},
+		},
+	},
+	render: (args) => (
+		<ThemeProvider theme={themeRingTheme}>
+			<ConfirmDialog
+				title="Delete device?"
+				message="The device and its history are deleted."
+				textButtonYes="Delete"
+				textButtonNo="Cancel"
+				handlerButtonYes={args.onYes}
+				handlerButtonNo={args.onNo}
+			/>
+		</ThemeProvider>
+	),
+	play: async ({ userEvent: user }) => {
+		const dialog = await page().findByRole("dialog", {
+			name: "Delete device?",
+		});
+		await waitFor(() => expect(dialog).toBeVisible());
+		const buttons = within(dialog).getAllByRole("button");
+		const rings: Record<string, string> = {};
+		for (const button of [buttons[1], buttons[0]]) {
+			await user.tab({ shift: button === buttons[0] });
+			await expect(button).toHaveFocus();
+			await waitFor(() => expect(button).toHaveClass("Mui-focusVisible"));
+			const cs = getComputedStyle(button);
+			rings[button.textContent ?? ""] =
+				`${cs.outlineWidth} ${cs.outlineStyle} ${cs.outlineColor}`;
+		}
+		await expect(rings, "focus ring of each dialog button").toEqual({
+			Delete: "3px solid rgb(156, 39, 176)",
+			Cancel: "3px solid rgb(156, 39, 176)",
+		});
+	},
+};
 
 const LONG_TITLE =
 	"Hochfrequenzchirurgiegerät Modell XYZ-2000 Sicherheitsmeldung Rückruf Charge 2026-17 Ersatzteile";

@@ -10,14 +10,14 @@ import { IDialogConfigInput } from "./Types";
 import { PushedDialogCloseContext } from "../../framework/PushedDialogCloseContext";
 import useCCTranslations from "../../utils/useCCTranslations";
 import {
-	Button,
-	Dialog,
 	DialogActions,
 	DialogContent,
 	DialogContentText,
 	DialogTitle,
 	TextField,
 } from "@mui/material";
+import FocusRingButton from "../../utils/internal/FocusRingButton";
+import ForcedColorsEdgeDialog from "../../utils/internal/ForcedColorsEdgeDialog";
 
 const InputDialogRaw = (props: IDialogConfigInput) => {
 	const {
@@ -69,7 +69,11 @@ const InputDialogRaw = (props: IDialogConfigInput) => {
 	}, [value, handlerButtonYes, textFieldValidator, closeThisDialog, setValid]);
 
 	return (
-		<Dialog open={true} onClose={removeDialog} aria-describedby={messageId}>
+		<ForcedColorsEdgeDialog
+			open={true}
+			onClose={removeDialog}
+			aria-describedby={messageId}
+		>
 			<DialogTitle>{props.title}</DialogTitle>
 			<DialogContent>
 				{/* a <div>, not MUI's <p>: the message may be block content */}
@@ -96,14 +100,14 @@ const InputDialogRaw = (props: IDialogConfigInput) => {
 				/>
 			</DialogContent>
 			<DialogActions>
-				<Button onClick={handleNo} color="primary">
+				<FocusRingButton onClick={handleNo} color="primary">
 					{props.textButtonNo}
-				</Button>
-				<Button onClick={handleYes} color="primary">
+				</FocusRingButton>
+				<FocusRingButton onClick={handleYes} color="primary">
 					{props.textButtonYes}
-				</Button>
+				</FocusRingButton>
 			</DialogActions>
-		</Dialog>
+		</ForcedColorsEdgeDialog>
 	);
 };
 

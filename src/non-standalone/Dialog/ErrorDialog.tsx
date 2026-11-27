@@ -1,10 +1,8 @@
 import React, { useContext, useId, useMemo } from "react";
 import { PushedDialogCloseContext } from "../../framework/PushedDialogCloseContext";
 import {
-	Button,
 	buttonClasses,
 	CircularProgress,
-	Dialog,
 	DialogActions,
 	DialogContent,
 	DialogContentText,
@@ -13,6 +11,8 @@ import {
 import { IDialogConfigSimple } from "./Types";
 import useRefState from "../../utils/useRefState";
 import { dialogButtonClose } from "./dialogButtonClose";
+import FocusRingButton from "../../utils/internal/FocusRingButton";
+import ForcedColorsEdgeDialog from "../../utils/internal/ForcedColorsEdgeDialog";
 
 // shown before the label of the button whose handler runs; the button's aria-disabled and
 // the dialog's aria-busy tell assistive technology
@@ -53,7 +53,7 @@ const ErrorDialogRaw = (props: IDialogConfigSimple) => {
 	);
 
 	return (
-		<Dialog
+		<ForcedColorsEdgeDialog
 			open={true}
 			onClose={handleClose}
 			aria-describedby={messageId}
@@ -67,7 +67,7 @@ const ErrorDialogRaw = (props: IDialogConfigSimple) => {
 			</DialogContent>
 			<DialogActions>
 				{props.buttons.map((data, index) => (
-					<Button
+					<FocusRingButton
 						key={index}
 						onClick={async () => {
 							if (getBusyButton() !== null) return;
@@ -100,10 +100,10 @@ const ErrorDialogRaw = (props: IDialogConfigSimple) => {
 						startIcon={busyButton === index ? busyIndicator : undefined}
 					>
 						{data.text}
-					</Button>
+					</FocusRingButton>
 				))}
 			</DialogActions>
-		</Dialog>
+		</ForcedColorsEdgeDialog>
 	);
 };
 
