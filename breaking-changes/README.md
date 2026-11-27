@@ -25,6 +25,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-27 | [RoutedTabs needs a name: `aria-label` or `aria-labelledby`](2026-11-27-routed-tabs-name-required.md) | type |
 | 2026-11-27 | [A toast's title and message are written into it a frame after it appears](2026-11-27-toast-text-written-a-frame-later.md) | behavior |
 | 2026-11-27 | [TextFieldWithHelp passes on all of its slotProps and every onChange argument](2026-11-27-text-field-with-help-passes-all-slot-props.md) | behavior |
+| 2026-11-27 | [DialogTitle's close icon has the color of MUI's default IconButton](2026-11-27-dialog-title-close-icon-action-color.md) | behavior |
 | 2026-11-27 | [InfiniteScroll: a `callBackDebounce` above 2^31 - 1 or `Infinity` makes no call](2026-11-27-infinite-scroll-endless-debounce-holds-calls.md) | behavior |
 | 2026-11-27 | [InlineSwitch's theme defaults leave out the props of a single switch](2026-11-27-inline-switch-theme-default-props.md) | type |
 | 2026-11-27 | [InlineSwitch's switch row is a `<label>` of spans, not a MUI Grid](2026-11-27-inline-switch-label-row-without-grid.md) | behavior |

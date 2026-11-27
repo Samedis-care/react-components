@@ -10,6 +10,7 @@ import {
 	DialogContent,
 	DialogContentText,
 	getContrastRatio,
+	Paper,
 	paperClasses,
 	Stack,
 	TextField,
@@ -72,6 +73,31 @@ const Opener = (props: { label: string; dialog: React.ReactNode }) => {
 		</Button>
 	);
 };
+
+/** WCAG contrast of a CSS color composited over an opaque background */
+const parseColor = (css: string) => {
+	const match = /rgba?\(([^)]+)\)/.exec(css);
+	if (!match) throw new Error(`not an rgb() color: ${css}`);
+	const parts = match[1]
+		.split(/[ ,/]+/)
+		.filter(Boolean)
+		.map(Number);
+	return [parts[0], parts[1], parts[2], parts[3] ?? 1];
+};
+const over = (fg: number[], bg: number[]) =>
+	[0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3])).concat(1);
+const luminance = (c: number[]) => {
+	const f = (v: number) => {
+		v /= 255;
+		return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+	};
+	return 0.2126 * f(c[0]) + 0.7152 * f(c[1]) + 0.0722 * f(c[2]);
+};
+const contrast = (a: number[], b: number[]) => {
+	const [x, y] = [luminance(a), luminance(b)];
+	return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+};
+const WHITE = [255, 255, 255, 1];
 
 // ─── ErrorDialog ─────────────────────────────────────────────────────────────
 
@@ -1156,6 +1182,138 @@ export const Issue3497Item19OpenInNewStaysInDialog: StoryObj<OpenInNewArgs> = {
 		await expect(dialog.scrollWidth).toBeLessThanOrEqual(dialog.clientWidth);
 	},
 };
+
+export const Issue3497Item20CloseIconMeets3To1: StoryObj<DialogTitleArgs> = {
+	args: { onClose: fn() },
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3497-ITEM-20: the close icon has the color of MUI's default IconButton, `palette.action.active`, 4.6:1 on the white dialog (it was grey 500, about 2.7:1). WCAG asks for 3:1.",
+			},
+		},
+	},
+	render: (args) => (
+		<Dialog open>
+			<DialogTitle onClose={args.onClose}>My Title</DialogTitle>
+			<DialogContent>
+				<DialogContentText>Dialog content.</DialogContentText>
+			</DialogContent>
+		</Dialog>
+	),
+	play: async () => {
+		const dialog = await page().findByRole("dialog");
+		const paperBg = over(
+			parseColor(getComputedStyle(dialog).backgroundColor),
+			WHITE,
+		);
+		const icon = within(dialog)
+			.getByRole("button", { name: "Close" })
+			.querySelector("svg");
+		if (!icon) throw new Error("no icon in the close button");
+		const ratio = contrast(
+			over(parseColor(getComputedStyle(icon).color), paperBg),
+			paperBg,
+		);
+		await expect(
+			ratio,
+			`close icon ${ratio.toFixed(2)}:1`,
+		).toBeGreaterThanOrEqual(3);
+	},
+};
+
+const darkTheme = createTheme({ palette: { mode: "dark" } });
+// CSS variables with both color schemes; an element with the class
+// `scheme-dark` gives its subtree the dark scheme's variables
+const cssVarsTheme = createTheme({
+	cssVariables: { colorSchemeSelector: ".scheme-%s" },
+	colorSchemes: { light: true, dark: true },
+});
+// keep the provider's color scheme off the page and out of the storage; MUI types
+// colorSchemeNode only for apps that declare their CSS variables in its types
+const SCHEME_IN_STORY_ONLY = { colorSchemeNode: null, storageManager: null };
+/** A theme whose IconButtons are `primary` unless they say otherwise */
+const iconButtonPrimaryTheme = createTheme({
+	components: { MuiIconButton: { defaultProps: { color: "primary" } } },
+});
+
+/** A Paper's color, with the elevation overlay of the dark palette */
+const paperColorOf = (paper: Element) => {
+	const cs = getComputedStyle(paper);
+	const base = over(parseColor(cs.backgroundColor), WHITE);
+	const overlay = /rgba?\([^)]+\)/.exec(cs.backgroundImage);
+	return overlay ? over(parseColor(overlay[0]), base) : base;
+};
+
+/** The close icon's color and its contrast on the paper `data-cell={id}` */
+const closeIconIn = (canvasElement: HTMLElement, id: string) => {
+	const paper = canvasElement.querySelector(`[data-cell="${id}"]`);
+	const icon = paper?.querySelector('button[aria-label="Close"] svg');
+	if (!paper || !icon) throw new Error(`no paper or close icon in ${id}`);
+	const color = getComputedStyle(icon).color;
+	const paperBg = paperColorOf(paper);
+	const ratio = contrast(over(parseColor(color), paperBg), paperBg);
+	return { color, contrast: ratio >= 3 ? "ok" : `${ratio.toFixed(2)}:1` };
+};
+
+const PAPER_SX = { width: 320, mb: 2 };
+
+export const Issue3497Item20CloseIconInOtherThemes: StoryObj<DialogTitleArgs> =
+	{
+		args: { onClose: fn() },
+		parameters: {
+			a11y: { test: "error" },
+			docs: {
+				description: {
+					story:
+						"ISSUE-3497-ITEM-20: the close icon on a dialog's paper in the dark palette, in the dark color scheme of a theme with CSS variables, and with a theme whose IconButtons default to `primary`. It reaches 3:1 in each, the dark scheme gives it the dark palette's color, and it keeps `action.active` whatever color the theme gives IconButtons.",
+				},
+			},
+		},
+		render: (args) => (
+			<>
+				<ThemeProvider theme={darkTheme}>
+					<Paper elevation={24} sx={PAPER_SX} data-cell="dark">
+						<DialogTitle onClose={args.onClose}>Dark palette</DialogTitle>
+					</Paper>
+				</ThemeProvider>
+				<ThemeProvider theme={cssVarsTheme} {...SCHEME_IN_STORY_ONLY}>
+					<Box className="scheme-dark">
+						<Paper elevation={24} sx={PAPER_SX} data-cell="scheme">
+							<DialogTitle onClose={args.onClose}>Dark scheme</DialogTitle>
+						</Paper>
+					</Box>
+				</ThemeProvider>
+				<ThemeProvider theme={iconButtonPrimaryTheme}>
+					<Paper elevation={24} sx={PAPER_SX} data-cell="primary">
+						<DialogTitle onClose={args.onClose}>
+							Primary IconButtons
+						</DialogTitle>
+					</Paper>
+				</ThemeProvider>
+			</>
+		),
+		play: async ({ canvasElement }) => {
+			const dark = closeIconIn(canvasElement, "dark");
+			const scheme = closeIconIn(canvasElement, "scheme");
+			const primary = closeIconIn(canvasElement, "primary");
+			await expect(
+				{
+					dark: dark.contrast,
+					scheme: scheme.contrast,
+					primary: primary.contrast,
+				},
+				"close icon contrast below 3:1",
+			).toEqual({ dark: "ok", scheme: "ok", primary: "ok" });
+			await expect(scheme.color, "dark scheme vs dark palette").toBe(
+				dark.color,
+			);
+			await expect(primary.color, "with primary IconButtons").toBe(
+				"rgba(0, 0, 0, 0.54)",
+			);
+		},
+	};
 
 // ─── Navigation ──────────────────────────────────────────────────────────────
 

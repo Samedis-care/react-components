@@ -34,7 +34,10 @@ export interface DialogTitleProps {
 	 * When set, a close (X) button is shown next to the heading, named by
 	 * `non-standalone.dialog.dialog-title.close`, and this is called without
 	 * arguments when it is clicked. DialogTitle closes nothing itself: pass e.g.
-	 * the function `useCloseThisDialog` returns.
+	 * the function `useCloseThisDialog` returns. The X has the palette's
+	 * `action.active` color, the color of MUI's default IconButton, whatever
+	 * color a theme gives IconButtons; a theme changes it in
+	 * `CcDialogTitle.styleOverrides.closeButton`.
 	 */
 	onClose?: () => void;
 	/**
@@ -125,7 +128,10 @@ const CloseButton = styled(IconButton, {
 	name: "CcDialogTitle",
 	slot: "closeButton",
 })(({ theme }) => ({
-	color: theme.palette.grey[500],
+	// the color of MUI's default IconButton, 3:1 and more on the dialog's paper
+	// in MUI's light and dark palettes, also where a theme gives IconButtons
+	// another default color
+	color: (theme.vars || theme).palette.action.active,
 	padding: `calc(${theme.spacing(1)} / 2)`,
 	zIndex: 1,
 	// a focus ring around the circle, as on FullFormDialog's open-in-new button
