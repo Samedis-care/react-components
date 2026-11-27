@@ -640,6 +640,106 @@ describe("showErrorDialog and showInfoDialog", () => {
 			expect(within(dialog).queryByRole("list")).toBeNull();
 		},
 	);
+
+	it("[ISSUE-3497-ITEM-6] showInfoDialog calls the onClose it is given once the dialog closed", async () => {
+		mount();
+		const onClose = vi.fn();
+		act(() => {
+			void showInfoDialog(ctx[0], { title: "T", message: "M", onClose });
+		});
+		fireEvent.click(btn("OK"));
+		await flush();
+		expect(onClose).toHaveBeenCalledTimes(1);
+	});
+
+	it("[ISSUE-3497-ITEM-6] showInfoDialog calls onClose once a button's handler has ended, before the code awaiting the dialog continues", async () => {
+		mount();
+		const order: string[] = [];
+		act(() => {
+			void showInfoDialog(ctx[0], {
+				title: "T",
+				message: "M",
+				onClose: () => order.push("onClose"),
+				buttons: [
+					{
+						text: "Open",
+						onClick: async () => {
+							await Promise.resolve();
+							order.push("handler ended");
+						},
+					},
+				],
+			}).then(() => order.push("settled"));
+		});
+		fireEvent.click(btn("Open"));
+		await flush();
+		expect(order).toEqual(["handler ended", "onClose", "settled"]);
+	});
+
+	it.each<
+		[string, (dlg: ReturnType<typeof showInfoDialog>) => Promise<void> | void]
+	>([
+		[
+			"Escape",
+			() => {
+				fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape" });
+			},
+		],
+		["the promise's close()", (dlg) => act(() => dlg.close())],
+		[
+			"the promise's close() twice",
+			(dlg) => {
+				act(() => dlg.close());
+				act(() => dlg.close());
+			},
+		],
+		[
+			"OK, and the promise's close() after it",
+			async (dlg) => {
+				fireEvent.click(btn("OK"));
+				await flush();
+				act(() => dlg.close());
+			},
+		],
+	])(
+		"[ISSUE-3497-ITEM-6] showInfoDialog calls onClose once when %s closes the dialog",
+		async (_name, closeDialog) => {
+			mount();
+			const onClose = vi.fn();
+			let dlg!: ReturnType<typeof showInfoDialog>;
+			act(() => {
+				dlg = showInfoDialog(ctx[0], { title: "T", message: "M", onClose });
+			});
+			await closeDialog(dlg);
+			await flush();
+			expect(dialogCount()).toBe(0);
+			expect(onClose).toHaveBeenCalledTimes(1);
+		},
+	);
+
+	it("[ISSUE-3497-ITEM-6] showInfoDialog calls onClose once when a button's handler closes the dialog with the promise's close()", async () => {
+		mount();
+		const onClose = vi.fn();
+		act(() => {
+			const dlg = showInfoDialog(ctx[0], {
+				title: "T",
+				message: "M",
+				onClose,
+				buttons: [
+					{
+						text: "Open",
+						onClick: () => {
+							dlg.close();
+						},
+					},
+				],
+			});
+		});
+		fireEvent.click(btn("Open"));
+		await flush();
+		expect(dialogCount()).toBe(0);
+		expect(onClose).toHaveBeenCalledTimes(1);
+	});
 });
 
 describe("FormDialog", () => {

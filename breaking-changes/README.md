@@ -35,6 +35,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-27 | [Escape closes a toast wherever focus is](2026-11-27-toast-escape-closes-from-anywhere.md) | behavior |
 | 2026-11-27 | [On phones a toast shows at the top of the screen](2026-11-27-toast-top-on-phones.md) | behavior, type |
 | 2026-11-27 | [A toast breaks a word too long for a line and stays within the screen](2026-11-27-toast-breaks-long-words.md) | behavior |
+| 2026-11-27 | [showInfoDialog calls the onClose it is given](2026-11-27-show-info-dialog-calls-on-close.md) | behavior |
 | 2026-11-26 | [A localized value without text in the UI language shows another language's text](2026-11-26-localized-string-falls-back-to-another-language.md) | behavior |
 | 2026-11-26 | [A HistoryRouter inside another one leaves the page's scroll position and focus alone](2026-11-26-nested-history-router-keeps-page-scroll-and-focus.md) | behavior |
 | 2026-11-26 | [isPlainObject tells a plain object by its prototype; a record with an entry named constructor counts](2026-11-26-is-plain-object-by-prototype.md) | behavior |
