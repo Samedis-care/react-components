@@ -1,8 +1,8 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import { createTheme, Theme, ThemeProvider } from "@mui/material";
 import type {} from "../src/theme-def";
 import React, { createElement } from "react";
-import { act, render, screen } from "@testing-library/react";
+import { act, cleanup, render, screen } from "@testing-library/react";
 import {
 	selectorLocalLoadHandler,
 	SingleSelect,
@@ -33,6 +33,12 @@ const overrideFunctions = (theme: Theme) =>
 				.styleOverrides ?? {},
 		),
 	);
+
+// Unmounts what each test rendered. Without it, the renders stay mounted until the file
+// ends, and React work they still have pending (the toasts' and the dialog's open
+// transitions, the locale rows' flags) runs after the jsdom environment is torn down and
+// throws "window is not defined".
+afterEach(cleanup);
 
 describe("theme-def", () => {
 	it("[ISSUE-3462-ITEM-17] types function styleOverrides without an ownerState for the components whose slots receive none", () => {
