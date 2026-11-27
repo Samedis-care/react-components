@@ -583,6 +583,126 @@ describe("CurrencyInput", () => {
 			expect(field("Amount")).toHaveValue(fmt("en", -1234.5, XCG));
 		});
 
+		it("[ISSUE-3484-ITEM-12] renders without throwing while the currency is empty", () => {
+			vi.spyOn(console, "error").mockImplementation(noop);
+			expect(() =>
+				render(<CurrencyInput label="Amount" currency="" value={3} />),
+			).not.toThrow();
+		});
+
+		it("[ISSUE-3484-ITEM-12] shows a malformed currency where the language puts a code, and the plain amount while the currency is missing", async () => {
+			vi.spyOn(console, "error").mockImplementation(noop);
+			// the currency, the text in en, the text in de
+			const cases: [string, string, string][] = [
+				["", "1,234.50", "1.234,50"],
+				// untyped data
+				[undefined as unknown as string, "1,234.50", "1.234,50"],
+				[null as unknown as string, "1,234.50", "1.234,50"],
+				["EURO", "EURO 1,234.50", "1.234,50 EURO"],
+				["€", "€ 1,234.50", "1.234,50 €"],
+				// well-formed, but unknown to Intl: as before
+				["XYZ", "XYZ 1,234.50", "1.234,50 XYZ"],
+			];
+			render(
+				<>
+					{cases.map(([currency], index) => (
+						<CurrencyInput
+							key={index}
+							label={`Amount ${index}`}
+							currency={currency}
+							value={1234.5}
+							onChange={noop}
+						/>
+					))}
+				</>,
+			);
+			// Intl puts a no-break space between a code and the number
+			const texts = () =>
+				cases.map((_, index) =>
+					field(`Amount ${index}`).value.replace(/\s/g, " "),
+				);
+			expect(texts()).toEqual(cases.map(([, en]) => en));
+			await setLanguage("de");
+			expect(texts()).toEqual(cases.map(([, , de]) => de));
+		});
+
+		it.each([
+			["", "5.00", "1,234.57", "1,234.56"],
+			["EURO", "EURO 5.00", "EURO 1,234.57", "EURO 1,234.56"],
+		])(
+			"[ISSUE-3484-ITEM-12] commits amounts typed while the currency is %j, rounded to two decimals",
+			(currency, five, rounded, example) => {
+				vi.spyOn(console, "error").mockImplementation(noop);
+				const onValue: ValueSpy = vi.fn();
+				render(
+					<Controlled initial={null} onValue={onValue}>
+						{(value, onChange) => (
+							<CurrencyInput
+								label="Amount"
+								currency={currency}
+								value={value}
+								onChange={onChange}
+							/>
+						)}
+					</Controlled>,
+				);
+				const text = () => field("Amount").value.replace(/\s/g, " ");
+				fireEvent.change(field("Amount"), { target: { value: "5" } });
+				fireEvent.blur(field("Amount"));
+				expect(text()).toBe(five);
+				fireEvent.change(field("Amount"), { target: { value: "1234.567" } });
+				fireEvent.blur(field("Amount"));
+				expect(text()).toBe(rounded);
+				// no number: flagged, with an example in the field's format
+				fireEvent.change(field("Amount"), { target: { value: "x" } });
+				fireEvent.blur(field("Amount"));
+				expect(field("Amount")).toHaveAttribute("aria-invalid", "true");
+				expect(
+					screen.getByText(`Enter a number, such as ${example}`),
+				).toBeInTheDocument();
+				fireEvent.change(field("Amount"), { target: { value: "" } });
+				fireEvent.blur(field("Amount"));
+				expect(reported(onValue)).toEqual([5, 1234.57, null]);
+			},
+		);
+
+		it.each([
+			// language, currency, the text the field shows for the amount, the amount
+			["en", "Cg.", "Cg. 5.00", 5],
+			["de", "Cg.", "5,00 Cg.", 5],
+			["en", "978", "978 1,978.00", 1978],
+			["de", "978", "1.978,00 978", 1978],
+			["en", "EURO", "-EURO 5.00", -5],
+			["de", "EURO", "-5,00 EURO", -5],
+			// nothing but the currency left
+			["en", "EURO", "EURO ", null],
+		])(
+			"[ISSUE-3484-ITEM-12] in %s, reads the text it shows for the malformed currency %j back: %j",
+			async (lng, currency, shown, amount) => {
+				vi.spyOn(console, "error").mockImplementation(noop);
+				await setLanguage(lng);
+				const onValue: ValueSpy = vi.fn();
+				render(
+					<Controlled initial={1} onValue={onValue}>
+						{(value, onChange) => (
+							<CurrencyInput
+								label="Amount"
+								currency={currency}
+								value={value}
+								onChange={onChange}
+							/>
+						)}
+					</Controlled>,
+				);
+				fireEvent.change(field("Amount"), { target: { value: shown } });
+				fireEvent.blur(field("Amount"));
+				expect(reported(onValue)).toEqual([amount]);
+				expect(field("Amount").value.replace(/\s/g, " ")).toBe(
+					amount === null ? "" : shown,
+				);
+			},
+		);
+
 		it("[ISSUE-3484-ITEM-3] keeps the sign of a negative amount", () => {
 			const onValue: ValueSpy = vi.fn();
 			render(

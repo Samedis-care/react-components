@@ -7,10 +7,30 @@ import parseLocalizedNumber from "../../../utils/parseLocalizedNumber";
 import useCurrentLocale from "../../../utils/useCurrentLocale";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import useCommitOnEnter from "../../../utils/internal/useCommitOnEnter";
+import formatLocalizedNumber, {
+	type CurrencyFallback,
+	getCurrencyFallback,
+	isWellFormedCurrency,
+	removeCurrencyText,
+} from "../../../utils/internal/formatLocalizedNumber";
+import useCurrencyErrorReport from "../useCurrencyErrorReport";
 
 export interface CurrencyInputProps extends TextFieldWithHelpProps {
 	/**
-	 * The currency to be used in formatting
+	 * The currency of the amount, an ISO 4217 code (`"EUR"`, `"JPY"`). It sets
+	 * how the amount is shown and the decimals it is rounded to on commit: 2 for
+	 * EUR, 0 for JPY. A well-formed code `Intl` doesn't know (`"XYZ"`) is shown
+	 * as the code, with two decimals.
+	 *
+	 * A currency that `Intl` rejects does not throw, and is reported (see
+	 * `disableErrorReporting`):
+	 * - a text that is not three letters (`"EURO"`, `"€"`) is shown as if it
+	 *   were a code, where the language puts one ("EURO 1,234.50" in en,
+	 *   "1.234,50 EURO" in de);
+	 * - a missing one (`""`, or `undefined` or `null` from untyped data) leaves
+	 *   the currency out: the plain amount ("1,234.50").
+	 *
+	 * Both round to two decimals, and the field reads back the text it shows.
 	 */
 	currency: string;
 	/**
@@ -37,12 +57,31 @@ export interface CurrencyInputProps extends TextFieldWithHelpProps {
 		evt: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
 		value: number | null,
 	) => void;
+	/**
+	 * Don't report a currency that `Intl` rejects (see `currency`), for an
+	 * amount whose currency may be missing on purpose.
+	 *
+	 * By default (`false`) each CurrencyInput reports it once while it shows an
+	 * amount, not again on a re-render with the same currency: to the error
+	 * reporter (source "CurrencyInput", extra `{ style: "currency", currency }`;
+	 * Sentry unless the app calls `configureErrorReporting`) and through
+	 * `console.error`. With `true` it does neither; the field is the same.
+	 */
+	disableErrorReporting?: boolean;
 }
 
 const CurrencyInput = (
 	props: CurrencyInputProps & Omit<TextFieldProps, "onChange" | "value">,
 ) => {
-	const { value, onChange, onBlur, onKeyDown, currency, ...muiProps } = props;
+	const {
+		value,
+		onChange,
+		onBlur,
+		onKeyDown,
+		currency,
+		disableErrorReporting,
+		...muiProps
+	} = props;
 	const { t } = useCCTranslations();
 	const locale = useCurrentLocale();
 	const numberFormatOptions: Intl.NumberFormatOptions = useMemo(
@@ -52,12 +91,45 @@ const CurrencyInput = (
 		}),
 		[currency],
 	);
+	// what the text is read back with: the options it is formatted with, or, for
+	// a currency Intl rejects, the ones it is formatted with in their place
+	const readFormat: CurrencyFallback = useMemo(
+		() =>
+			isWellFormedCurrency(currency)
+				? { options: numberFormatOptions, currencyText: null }
+				: getCurrencyFallback(numberFormatOptions),
+		[currency, numberFormatOptions],
+	);
 	const formatNumber = useCallback(
 		(value: number | null) =>
-			value != null ? value.toLocaleString(locale, numberFormatOptions) : "",
+			value != null
+				? formatLocalizedNumber(value, locale, numberFormatOptions).text
+				: "",
 		[locale, numberFormatOptions],
 	);
-	const valueFormatted = formatNumber(value);
+	const parseNumber = useCallback(
+		(text: string) =>
+			parseLocalizedNumber(
+				removeCurrencyText(text, locale, readFormat),
+				readFormat.options,
+			),
+		[locale, readFormat],
+	);
+	const formatted = useMemo(
+		() =>
+			value != null
+				? formatLocalizedNumber(value, locale, numberFormatOptions)
+				: null,
+		[locale, numberFormatOptions, value],
+	);
+	const valueFormatted = formatted ? formatted.text : "";
+	useCurrencyErrorReport(
+		"CurrencyInput",
+		formatted?.currencyError ?? null,
+		disableErrorReporting,
+		"currency",
+		currency,
+	);
 	const [valueInternal, setValueInternal] = useState(valueFormatted);
 	// set by a blur whose text does not parse, and shown as the helper text
 	const [parseError, setParseError] = useState(false);
@@ -85,27 +157,17 @@ const CurrencyInput = (
 	// the form without a blur
 	const commit = useCallback(() => {
 		if (lastChangeEvent) {
-			const value = parseLocalizedNumber(valueInternal, numberFormatOptions);
+			const value = parseNumber(valueInternal);
 			if (value != null && isNaN(value)) {
 				setParseError(true);
 			} else if (onChange) {
 				setParseError(false);
-				const formatted = formatNumber(value);
 				// we parse here so decimal points are limited and view always matches data
-				onChange(
-					lastChangeEvent,
-					parseLocalizedNumber(formatted, numberFormatOptions),
-				);
+				onChange(lastChangeEvent, parseNumber(formatNumber(value)));
 				setLastChangeEvent(null);
 			}
 		}
-	}, [
-		formatNumber,
-		lastChangeEvent,
-		numberFormatOptions,
-		onChange,
-		valueInternal,
-	]);
+	}, [formatNumber, lastChangeEvent, onChange, parseNumber, valueInternal]);
 
 	const handleBlur = useCallback(
 		(evt: React.FocusEvent<HTMLTextAreaElement | HTMLInputElement>) => {
