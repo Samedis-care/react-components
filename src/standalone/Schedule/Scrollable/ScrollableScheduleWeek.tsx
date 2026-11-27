@@ -64,11 +64,19 @@ const RetryButton = styled(Button)(({ theme }) => ({
 	"&.Mui-focusVisible": focusRing(theme, 2),
 }));
 
+// the week line is a heading for assistive technology and looks like the text
+// around it; typeof Grid keeps the `component` prop, which styled() drops
+const WeekHeading = styled(Grid)({
+	margin: 0,
+	font: "inherit",
+}) as typeof Grid;
+
 /**
- * One week of ScrollableSchedule: a spinner while it loads, then a "Week N,
- * DD MMM - DD MMM" line and its day rows. When the load fails, the week line
- * stays and an alert names the week and shows the error's message, with a
- * Retry button that loads the week again.
+ * One week of ScrollableSchedule: a spinner while it loads, then its week line
+ * and its day rows. The week line is an `h3` heading, "Week N, DD MMM -
+ * DD MMM YYYY" (both years for a week that runs into the next one). When the
+ * load fails, the week line stays and an alert names the week and shows the
+ * error's message, with a Retry button that loads the week again.
  */
 class ScrollableScheduleWeek extends PureComponent<IProps, IState> {
 	/**
@@ -80,7 +88,7 @@ class ScrollableScheduleWeek extends PureComponent<IProps, IState> {
 	 * The week line; it stays in place from the failed week to the retry and
 	 * the loaded week, so it takes the focus from the Retry button
 	 */
-	private weekLine = React.createRef<HTMLDivElement>();
+	private weekLine = React.createRef<HTMLHeadingElement>();
 
 	constructor(props: IProps) {
 		super(props);
@@ -201,16 +209,18 @@ class ScrollableScheduleWeek extends PureComponent<IProps, IState> {
 
 		const errorId = `${idPrefix}-error`;
 		const endOfWeek = firstDay.clone().add(6, "days");
+		const startFormat =
+			firstDay.year() === endOfWeek.year() ? "DD MMM" : "DD MMM YYYY";
 		return (
 			<>
 				<Grid size={12}>
 					<Divider />
 				</Grid>
 				<Grid size={1} />
-				<Grid size={11} ref={this.weekLine} tabIndex={-1}>
+				<WeekHeading size={11} component="h3" ref={this.weekLine} tabIndex={-1}>
 					{t("standalone.schedule.week")} {firstDay.week()},{" "}
-					{firstDay.format("DD MMM")} - {endOfWeek.format("DD MMM")}
-				</Grid>
+					{firstDay.format(startFormat)} - {endOfWeek.format("DD MMM YYYY")}
+				</WeekHeading>
 				{data ? (
 					dayItems
 				) : retrying ? (

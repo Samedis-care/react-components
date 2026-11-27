@@ -17,6 +17,7 @@ import {
 	screen,
 	within,
 } from "@testing-library/react";
+import { computeAccessibleName } from "dom-accessibility-api";
 import moment from "moment";
 import ccI18n from "../../src/i18n";
 import ScrollableSchedule from "../../src/standalone/Schedule/Scrollable";
@@ -160,6 +161,10 @@ const week = (tag: string): IDayData[][] =>
 		{ id: `${tag}-${i}`, title: `${tag}-idx${i}` },
 	]);
 
+/** like week(), but every entry has an onClick, so it is an interactive entry */
+const clickableWeek = (tag: string): IDayData[][] =>
+	week(tag).map((day) => day.map((entry) => ({ ...entry, onClick: vi.fn() })));
+
 const deferred = <T,>() => {
 	let resolve!: (v: T) => void;
 	let reject!: (e: unknown) => void;
@@ -192,7 +197,7 @@ const clampScroll = (el: HTMLElement) => {
 };
 
 const weekLabels = (container: HTMLElement) =>
-	Array.from(scrollerOf(container).querySelectorAll(".MuiGrid-container > div"))
+	Array.from(scrollerOf(container).querySelectorAll(".MuiGrid-container > *"))
 		.map((d) => d.textContent ?? "")
 		.filter(isWeekLabel);
 
@@ -274,9 +279,9 @@ describe("fill and weeks", () => {
 		await advance(400);
 		const labels = weekLabels(container);
 		expect(labels).toEqual([
-			"Week 41, 04 Oct - 10 Oct",
-			"Week 42, 11 Oct - 17 Oct",
-			"Week 43, 18 Oct - 24 Oct",
+			"Week 41, 04 Oct - 10 Oct 2026",
+			"Week 42, 11 Oct - 17 Oct 2026",
+			"Week 43, 18 Oct - 24 Oct 2026",
 		]);
 		rerender(<Harness tag="B" />);
 		await advance(400);
@@ -447,9 +452,9 @@ describe("language change", () => {
 		);
 		// as on mount: the current week, the next one, and the week above them
 		expect(weekLabels(container)).toEqual([
-			"Woche 41, 05 Okt. - 11 Okt.",
-			"Woche 42, 12 Okt. - 18 Okt.",
-			"Woche 43, 19 Okt. - 25 Okt.",
+			"Woche 41, 05 Okt. - 11 Okt. 2026",
+			"Woche 42, 12 Okt. - 18 Okt. 2026",
+			"Woche 43, 19 Okt. - 25 Okt. 2026",
 		]);
 		expect(scrollerOf(container).scrollTop).toBe(scrollTopOnMount);
 	});
@@ -505,7 +510,7 @@ describe("accessibility", () => {
 			screen.queryByRole("alert") ?? screen.queryByRole("status");
 		expect(announcer, "no alert or status region").not.toBeNull();
 		expect(announcer).toHaveTextContent("Network failure");
-		expect(weekLabels(container)).toContain("Week 42, 11 Oct - 17 Oct");
+		expect(weekLabels(container)).toContain("Week 42, 11 Oct - 17 Oct 2026");
 	});
 	it("[ISSUE-3478-ITEM-16] Retry loads the failed week again with the filter values; its rows replace the error", async () => {
 		let fail = true;
@@ -533,7 +538,7 @@ describe("accessibility", () => {
 			[0, { f: true }],
 		]);
 		expect(screen.queryByRole("alert")).toBeNull();
-		expect(weekLabels(container)).toContain("Week 42, 11 Oct - 17 Oct");
+		expect(weekLabels(container)).toContain("Week 42, 11 Oct - 17 Oct 2026");
 		expect(allEntries(container)).toContain("w0-idx0");
 	});
 	it("[ISSUE-3478-ITEM-16] the error is announced once: the failed week re-renders with the same alert", async () => {
@@ -605,7 +610,7 @@ describe("accessibility", () => {
 		fireEvent.click(retry);
 		await advance(100);
 		const line = document.activeElement as HTMLElement;
-		expect(line.textContent).toBe("Week 42, 11 Oct - 17 Oct");
+		expect(line.textContent).toBe("Week 42, 11 Oct - 17 Oct 2026");
 		// the retry is pending: a spinner below the week line, no alert
 		expect(screen.queryByRole("alert")).toBeNull();
 		expect(screen.getAllByRole("progressbar")).toHaveLength(1);
@@ -658,6 +663,102 @@ describe("accessibility", () => {
 		expect(
 			within(alert).getByRole("button", { name: "Erneut versuchen" }),
 		).toBeInTheDocument();
+	});
+	it("[ISSUE-3478-ITEM-17] each day's entries are in a group named by the day and its date", async () => {
+		render(
+			<ScrollableSchedule
+				wrapperClass={SCROLLER}
+				loadWeekCallback={(o) => clickableWeek("w" + o)}
+			/>,
+		);
+		await advance(400);
+		const entry = screen.getByRole("button", { name: "w0-idx3" });
+		const group = entry.closest(
+			"[role=group], [role=list], [role=region], section, ul, ol",
+		);
+		expect(group, "no grouping element around the entry").not.toBeNull();
+		// weekday, month and day, in whatever order the locale uses
+		const name = computeAccessibleName(group!);
+		expect(name).toMatch(/Wednesday/);
+		expect(name).toMatch(/October/);
+		expect(name).toMatch(/\b14\b/);
+	});
+	it("[ISSUE-3478-ITEM-17] each week has a heading with its dates including the year", async () => {
+		render(
+			<ScrollableSchedule
+				wrapperClass={SCROLLER}
+				loadWeekCallback={(o) => week("w" + o)}
+			/>,
+		);
+		await advance(400);
+		expect(
+			screen.getAllByRole("heading", { name: /\b42\b.*2026/ }),
+		).toHaveLength(1);
+	});
+	it("[ISSUE-3478-ITEM-17] every day, also one without entries, is a group named by its full date only", async () => {
+		render(
+			<ScrollableSchedule
+				wrapperClass={SCROLLER}
+				loadWeekCallback={(o) =>
+					o === 0 ? Array.from({ length: 7 }, () => []) : week("w" + o)
+				}
+			/>,
+		);
+		await advance(400);
+		const names = screen
+			.getAllByRole("group")
+			.map((group) => computeAccessibleName(group));
+		const sunday = names.indexOf("Sunday, October 11, 2026");
+		expect(sunday).toBeGreaterThanOrEqual(0);
+		// the short label ("14 Wed") is not read in addition to the full date
+		expect(names.slice(sunday, sunday + 7)).toEqual([
+			"Sunday, October 11, 2026",
+			"Monday, October 12, 2026",
+			"Tuesday, October 13, 2026",
+			"Wednesday, October 14, 2026",
+			"Thursday, October 15, 2026",
+			"Friday, October 16, 2026",
+			"Saturday, October 17, 2026",
+		]);
+	});
+	it("[ISSUE-3478-ITEM-17] a week that runs into the next year names both years; the week headings are of level 3", async () => {
+		// Wed 2026-12-30: the current week is Sun 27 Dec 2026 - Sat 2 Jan 2027
+		vi.setSystemTime(new Date(2026, 11, 30, 12));
+		render(
+			<ScrollableSchedule
+				wrapperClass={SCROLLER}
+				loadWeekCallback={(o) => week("w" + o)}
+			/>,
+		);
+		await advance(400);
+		expect(
+			screen.getAllByRole("heading", { level: 3 }).map((h) => h.textContent),
+		).toEqual([
+			"Week 52, 20 Dec - 26 Dec 2026",
+			"Week 1, 27 Dec 2026 - 02 Jan 2027",
+			"Week 2, 03 Jan - 09 Jan 2027",
+		]);
+	});
+	it("[ISSUE-3478-ITEM-17] de: the day groups and the week headings follow the locale", async () => {
+		moment.locale("de");
+		await act(async () => {
+			await ccI18n.changeLanguage("de");
+		});
+		render(
+			<ScrollableSchedule
+				wrapperClass={SCROLLER}
+				loadWeekCallback={(o) => clickableWeek("w" + o)}
+			/>,
+		);
+		await advance(400);
+		expect(
+			screen.getByRole("heading", { name: "Woche 42, 12 Okt. - 18 Okt. 2026" }),
+		).toBeInTheDocument();
+		// the week starts on Monday in de: [2] is Wednesday
+		const entry = screen.getByRole("button", { name: "w0-idx2" });
+		expect(entry.closest("[role=group]")).toHaveAccessibleName(
+			"Mittwoch, 14. Oktober 2026",
+		);
 	});
 	it("[ISSUE-3478-ITEM-19] today's row is marked as the current date", async () => {
 		const { container } = render(

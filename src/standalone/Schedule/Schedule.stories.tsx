@@ -179,7 +179,7 @@ const meta: Meta<ScrollableScheduleStoryProps> = {
 		docs: {
 			description: {
 				component:
-					"An endless list of weeks for narrow screens, below a header bar with today's date (click: scroll to today's row) and the filters and actions. Weeks are requested one at a time through `loadWeekCallback` while the list fills and whenever the user scrolls to its top or bottom. The scroll container's height must come from `wrapperClass` (here a class with `height: 400px`). For wide screens use `WeeklySchedule`.",
+					"An endless list of weeks for narrow screens, below a header bar with today's date (click: scroll to today's row) and the filters and actions. Each week starts with a heading (level 3) with its dates and year, and each day is a group named by its full date. Weeks are requested one at a time through `loadWeekCallback` while the list fills and whenever the user scrolls to its top or bottom. The scroll container's height must come from `wrapperClass` (here a class with `height: 400px`). For wide screens use `WeeklySchedule`.",
 			},
 		},
 	},
@@ -450,7 +450,7 @@ const todayRowOf = (root: HTMLElement) =>
 const weeksOf = (scroller: HTMLElement) => {
 	const weeks: { number: number; rows: HTMLElement[] }[] = [];
 	for (const row of Array.from(
-		scroller.querySelectorAll<HTMLElement>(".MuiGrid-container > div"),
+		scroller.querySelectorAll<HTMLElement>(".MuiGrid-container > *"),
 	)) {
 		if (row.querySelector("hr")) weeks.push({ number: NaN, rows: [] });
 		const week = weeks[weeks.length - 1];
@@ -529,5 +529,55 @@ export const Issue3478Item2RestartsAtTheCurrentWeek: Story = {
 		const list = () => scrollerOf(canvasElement);
 		await waitFor(() => expect(isFull(list())).toBe(true), { timeout: 3000 });
 		await waitFor(() => expect(weekAtTopOf(list())).toBe(currentWeek));
+	},
+};
+
+export const Issue3478Item17WeeksAndDaysHaveStructure: Story = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					'ISSUE-3478-ITEM-17: each week starts with a heading of level 3, "Week N, DD MMM - DD MMM YYYY", which looks like the text around it. Each day is a group named by its full date ("Wednesday, October 14, 2026"). The full date is visually hidden inside the day\'s label, so a screen reader that brings it into view keeps the list at that day.',
+			},
+		},
+	},
+	play: async ({ canvasElement, args }) => {
+		const scroller = await waitForFill(canvasElement, args.loadWeekCallback);
+		const headings = within(scroller).getAllByRole("heading", { level: 3 });
+		await expect(headings.length).toBeGreaterThan(0);
+		for (const heading of headings) {
+			await expect(heading).toHaveAccessibleName(
+				/^Week \d+, \d{2} \w{3}( \d{4})? - \d{2} \w{3} \d{4}$/,
+			);
+			// no heading font or margins: it looks as the week line did
+			const style = getComputedStyle(heading);
+			const around = getComputedStyle(heading.parentElement!);
+			await expect(style.fontSize).toBe(around.fontSize);
+			await expect(style.fontWeight).toBe(around.fontWeight);
+			await expect(style.marginTop).toBe("0px");
+			await expect(style.marginBottom).toBe("0px");
+		}
+		const groups = within(scroller).getAllByRole("group");
+		await expect(groups).toHaveLength(headings.length * 7);
+		for (const group of groups) {
+			await expect(group).toHaveAccessibleName(
+				/^[A-Z][a-z]+day, [A-Z][a-z]+ \d{1,2}, \d{4}$/,
+			);
+			// the visually hidden full date lies inside the day's label
+			const label = canvasElement.ownerDocument.getElementById(
+				group.getAttribute("aria-labelledby")!,
+			)!;
+			const fullDate = label.querySelector(":scope > :not([aria-hidden])")!;
+			const inner = fullDate.getBoundingClientRect();
+			const outer = label.getBoundingClientRect();
+			await expect(
+				inner.top >= outer.top &&
+					inner.bottom <= outer.bottom &&
+					inner.left >= outer.left &&
+					inner.right <= outer.right,
+				"the full date is outside the day's label",
+			).toBe(true);
+		}
 	},
 };
