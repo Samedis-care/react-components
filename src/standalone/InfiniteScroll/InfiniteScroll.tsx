@@ -154,8 +154,13 @@ export interface InfiniteScrollProps extends React.HTMLAttributes<HTMLDivElement
 	 * while a load runs, so that no call is made until it ends.
 	 *
 	 * `0` calls the callbacks synchronously. A negative number or `NaN` counts
-	 * as `0`. Can be changed after mount; it applies to the waits that start
-	 * after the change, and with `0` the next trigger calls at once.
+	 * as `0`. A wait longer than 2147483647 ms (2^31 - 1, about 24.8 days, the
+	 * longest delay a timer supports), `Infinity` included, never ends: while
+	 * it is set, no call is made, as while `loading` is set, and the calls that
+	 * come up meanwhile are made once it changes to a shorter wait, after that
+	 * wait, if the content still needs them then.
+	 * Can be changed after mount; it applies to the waits that start after the
+	 * change, and with `0` the next trigger calls at once.
 	 *
 	 * A call is made with the callback of the latest render: a callback that is
 	 * replaced or removed while a call waits is not called. A call that still
@@ -208,6 +213,13 @@ const DEFAULT_THRESHOLD = 250;
  * The default `callBackDebounce`, in milliseconds
  */
 const DEFAULT_CALLBACK_DEBOUNCE = 100;
+
+/**
+ * The longest delay a timer supports, in milliseconds (2^31 - 1, about 24.8
+ * days). Browsers convert a delay to a 32-bit integer, so they run a longer
+ * one, `Infinity` included, after a few ms or after a wrapped-around delay.
+ */
+const MAX_TIMER_DELAY = 2 ** 31 - 1;
 
 /**
  * Does the content overflow the scroll container by more than `threshold`?
@@ -477,8 +489,8 @@ interface ScrollState {
 	 */
 	topLoadDue: boolean;
 	/**
-	 * The calls that came up while `loading` was set, per callback; they are
-	 * requested again once `loading` turns false
+	 * The calls that came up while they were held (see `holdsLoads`), per
+	 * callback; they are requested again once they no longer are
 	 */
 	heldLoads: Record<LoadCallbackName, boolean>;
 }
@@ -511,12 +523,21 @@ const getThreshold = (props: InfiniteScrollProps): number => {
 
 /**
  * The `callBackDebounce` prop, with its default; a negative number or NaN
- * counts as 0
+ * counts as 0, and `null` stands for a wait longer than `MAX_TIMER_DELAY`
+ * (Infinity included), which never ends
  */
-const getCallBackDebounce = (props: InfiniteScrollProps): number => {
+const getCallBackDebounce = (props: InfiniteScrollProps): number | null => {
 	const wait = props.callBackDebounce ?? DEFAULT_CALLBACK_DEBOUNCE;
+	if (wait > MAX_TIMER_DELAY) return null;
 	return wait > 0 ? wait : 0;
 };
+
+/**
+ * Are the calls of the load callbacks held: while `loading` is set, and while
+ * the `callBackDebounce` wait never ends?
+ */
+const holdsLoads = (props: InfiniteScrollProps): boolean =>
+	!!props.loading || getCallBackDebounce(props) === null;
 
 /**
  * Stops holding the anchor
@@ -611,13 +632,18 @@ const cancelLoad = (scroll: ScrollState, name: LoadCallbackName): void => {
 /**
  * Requests a call of the `loadMoreTop` or `loadMoreBottom` prop:
  * `callBackDebounce` ms from now, or right away for 0 (see
- * `getCallBackDebounce`). A request made while a call waits joins it and does
- * not restart the wait, so triggers that keep coming (a steady scroll near an
+ * `getCallBackDebounce`); it is held while that wait never ends (see
+ * `holdsLoads`). A request made while a call waits joins it and does not
+ * restart the wait, so triggers that keep coming (a steady scroll near an
  * end, new `children` one after another) do not postpone the call; the first
  * request after the call starts a new wait.
  */
 const requestLoad = (scroll: ScrollState, name: LoadCallbackName): void => {
 	const wait = getCallBackDebounce(scroll.props);
+	if (wait === null) {
+		scroll.heldLoads[name] = true;
+		return;
+	}
 	if (wait === 0) {
 		cancelLoad(scroll, name);
 		callLoad(scroll, name);
@@ -631,8 +657,8 @@ const requestLoad = (scroll: ScrollState, name: LoadCallbackName): void => {
 };
 
 /**
- * Requests the calls held while `loading` was set (see `callLoad`) again,
- * now that it turned false
+ * Requests the held calls (see `holdsLoads`) again, now that they are no
+ * longer held
  */
 const requestHeldLoads = (scroll: ScrollState): void => {
 	for (const name of LOAD_CALLBACK_NAMES) {
@@ -662,15 +688,15 @@ const loadTopIfDue = (scroll: ScrollState): void => {
  * dropped once content that arrived in the meantime fills the container and
  * moves that end away (or focus moved on), and one is not made while the
  * container is hidden (`pauseFillWhileHidden`).
- * While `loading` is set, the call is held and requested again once it
- * turns false. A fill call that is dropped because the content now fills
- * the container (rows that grew on their own) lets the due `loadMoreTop`
- * follow.
+ * While calls are held (see `holdsLoads`), the call is held and requested
+ * again once they no longer are. A fill call that is dropped because the
+ * content now fills the container (rows that grew on their own) lets the due
+ * `loadMoreTop` follow.
  */
 const callLoad = (scroll: ScrollState, name: LoadCallbackName): void => {
 	const { wrapper } = scroll;
 	if (!wrapper || pauseFillWhileHidden(scroll)) return;
-	if (scroll.props.loading) {
+	if (holdsLoads(scroll.props)) {
 		scroll.heldLoads[name] = true;
 		return;
 	}
@@ -783,7 +809,7 @@ const handleUpdate = (
 	) {
 		handleResize(scroll);
 	}
-	if (prevProps.loading && !props.loading) {
+	if (holdsLoads(prevProps) && !holdsLoads(props)) {
 		requestHeldLoads(scroll);
 	}
 };

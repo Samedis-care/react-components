@@ -2549,5 +2549,149 @@ describe("InfiniteScroll behavior (stubbed layout)", () => {
 				},
 			);
 		});
+
+		describe("a callBackDebounce above 2147483647 or Infinity", () => {
+			it.each([Number.POSITIVE_INFINITY, 2 ** 31])(
+				"[ISSUE-3471-ITEM-16] makes no call with callBackDebounce={%s}, a wait that never ends",
+				(wait) => {
+					const top = vi.fn();
+					const bottom = vi.fn();
+					const { container } = render(
+						<InfiniteScroll
+							className={SCROLLER}
+							loadMoreTop={top}
+							loadMoreBottom={bottom}
+							callBackDebounce={wait}
+						>
+							<div />
+						</InfiniteScroll>,
+					);
+					const scroller = getScroller(container);
+					scrollTo(scroller, 700);
+					scrollTo(scroller, 0);
+					// longer than the longest delay a timer supports
+					advance(2 ** 31);
+					expect(top).not.toHaveBeenCalled();
+					expect(bottom).not.toHaveBeenCalled();
+				},
+			);
+
+			it("[ISSUE-3471-ITEM-16] waits callBackDebounce={2147483647}, the longest delay a timer supports, before the call", () => {
+				const bottom = vi.fn();
+				const { container } = render(
+					<InfiniteScroll
+						className={SCROLLER}
+						loadMoreBottom={bottom}
+						callBackDebounce={2 ** 31 - 1}
+					>
+						<div />
+					</InfiniteScroll>,
+				);
+				scrollTo(getScroller(container), 700);
+				advance(2 ** 31 - 2);
+				expect(bottom).not.toHaveBeenCalled();
+				advance(1);
+				expect(bottom).toHaveBeenCalledTimes(1);
+			});
+
+			it.each([Number.POSITIVE_INFINITY, 2 ** 31])(
+				"[ISSUE-3471-ITEM-16] makes the call that came due while callBackDebounce was %s once it changes to a shorter wait, after that wait",
+				(wait) => {
+					// content that does not fill the container: nothing to scroll
+					scrollHeightOf = () => 300;
+					const bottom = vi.fn();
+					const children = <div />;
+					const { rerender } = render(
+						<InfiniteScroll
+							className={SCROLLER}
+							loadMoreBottom={bottom}
+							callBackDebounce={wait}
+						>
+							{children}
+						</InfiniteScroll>,
+					);
+					advance(1000);
+					expect(bottom).not.toHaveBeenCalled();
+					rerender(
+						<InfiniteScroll
+							className={SCROLLER}
+							loadMoreBottom={bottom}
+							callBackDebounce={250}
+						>
+							{children}
+						</InfiniteScroll>,
+					);
+					advance(249);
+					expect(bottom).not.toHaveBeenCalled();
+					advance(1);
+					expect(bottom).toHaveBeenCalledTimes(1);
+				},
+			);
+
+			it("[ISSUE-3471-ITEM-16] holds the call that waits when callBackDebounce changes to Infinity, and makes it once it changes back", () => {
+				const bottom = vi.fn();
+				const children = <div />;
+				const { container, rerender } = render(
+					<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom}>
+						{children}
+					</InfiniteScroll>,
+				);
+				// this one waits the default 100ms
+				scrollTo(getScroller(container), 700);
+				rerender(
+					<InfiniteScroll
+						className={SCROLLER}
+						loadMoreBottom={bottom}
+						callBackDebounce={Number.POSITIVE_INFINITY}
+					>
+						{children}
+					</InfiniteScroll>,
+				);
+				advance(1000);
+				expect(bottom).not.toHaveBeenCalled();
+				rerender(
+					<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom}>
+						{children}
+					</InfiniteScroll>,
+				);
+				advance(100);
+				expect(bottom).toHaveBeenCalledTimes(1);
+			});
+
+			it("[ISSUE-3471-ITEM-16] makes no call when loading turns false while callBackDebounce is Infinity", () => {
+				const bottom = vi.fn();
+				const children = <div />;
+				const { container, rerender } = render(
+					<InfiniteScroll
+						className={SCROLLER}
+						loadMoreBottom={bottom}
+						callBackDebounce={Number.POSITIVE_INFINITY}
+						loading
+					>
+						{children}
+					</InfiniteScroll>,
+				);
+				scrollTo(getScroller(container), 700);
+				advance(1000);
+				rerender(
+					<InfiniteScroll
+						className={SCROLLER}
+						loadMoreBottom={bottom}
+						callBackDebounce={Number.POSITIVE_INFINITY}
+					>
+						{children}
+					</InfiniteScroll>,
+				);
+				advance(1000);
+				expect(bottom).not.toHaveBeenCalled();
+				rerender(
+					<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom}>
+						{children}
+					</InfiniteScroll>,
+				);
+				advance(100);
+				expect(bottom).toHaveBeenCalledTimes(1);
+			});
+		});
 	});
 });
