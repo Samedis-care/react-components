@@ -468,6 +468,47 @@ describe("IntegerInputField", () => {
 		expect(root).toHaveStyle({ marginTop: "7px" });
 		expect(ref.current).toBe(root);
 	});
+
+	it("[ISSUE-3484-ITEM-15] sets a ref passed through slotProps.htmlInput", () => {
+		const ref = React.createRef<HTMLInputElement>();
+		render(
+			<IntegerInputField
+				label="Count"
+				value={3}
+				onChange={noop}
+				slotProps={{ htmlInput: { ref } }}
+			/>,
+		);
+		expect(ref.current).toBe(field("Count"));
+	});
+
+	it("[ISSUE-3484-ITEM-15] keeps the caret after a typed digit while the caller's inputRef and htmlInput ref are set too", async () => {
+		const user = userEvent.setup();
+		const inputRef = React.createRef<HTMLInputElement>();
+		const htmlInputRef = React.createRef<HTMLInputElement>();
+		render(
+			<Controlled initial={1234} onValue={vi.fn()}>
+				{(value, onChange) => (
+					<IntegerInputField
+						label="Count"
+						value={value}
+						onChange={onChange}
+						inputRef={inputRef}
+						slotProps={{ htmlInput: { ref: htmlInputRef } }}
+					/>
+				)}
+			</Controlled>,
+		);
+		const input = field("Count");
+		expect(inputRef.current).toBe(input);
+		expect(htmlInputRef.current).toBe(input);
+		input.focus();
+		// between the 2 and the 3 of "1,234"
+		input.setSelectionRange(3, 3);
+		await user.keyboard("5");
+		expect(input).toHaveValue("12,534");
+		expect(input.selectionStart).toBe(4);
+	});
 });
 
 describe("CurrencyInput", () => {
@@ -1729,6 +1770,84 @@ const INPUTS: [
 ];
 
 describe("all three number inputs", () => {
+	describe.each(INPUTS)("%s", (_name, make, inputMode) => {
+		it("is a text box named by its label, with required, helper text and error on the input", () => {
+			render(
+				make({
+					label: "Qty",
+					value: 5,
+					required: true,
+					helperText: "Per month",
+					error: true,
+					onChange: noop,
+				}),
+			);
+			const input = field("Qty");
+			expect(input).toHaveAttribute("type", "text");
+			expect(input).toHaveAttribute("inputmode", inputMode);
+			expect(input).toBeRequired();
+			expect(input).toHaveAccessibleDescription("Per month");
+			expect(input).toHaveAttribute("aria-invalid", "true");
+		});
+
+		it("keeps the caller's htmlInput attributes next to its inputmode, so aria-labelledby names a field without a label", () => {
+			render(
+				<>
+					<span id="qty-column">Quantity</span>
+					{make({
+						value: 2,
+						onChange: noop,
+						slotProps: {
+							htmlInput: { "aria-labelledby": "qty-column", "data-row": "1" },
+						},
+					})}
+				</>,
+			);
+			const input = field("Quantity");
+			expect(input).toHaveAttribute("data-row", "1");
+			expect(input).toHaveAttribute("inputmode", inputMode);
+		});
+
+		it("is disabled with the field, and has no Clear button then", () => {
+			env.touch = true;
+			render(make({ label: "Qty", value: 5, disabled: true, onChange: noop }));
+			expect(field("Qty")).toBeDisabled();
+			expect(screen.queryByRole("button", { name: "Clear" })).toBeNull();
+		});
+
+		it("[ISSUE-3484-ITEM-15] passes a function-form slotProps.htmlInput on to the input", () => {
+			render(
+				make({
+					label: "Qty",
+					value: 2,
+					onChange: noop,
+					slotProps: { htmlInput: () => ({ "data-row": "1" }) },
+				}),
+			);
+			expect(field("Qty")).toHaveAttribute("data-row", "1");
+		});
+
+		it("[ISSUE-3484-ITEM-15] calls a function-form slotProps.htmlInput with the field's state, and sets the ref it returns next to its inputmode", () => {
+			const ref = React.createRef<HTMLInputElement>();
+			const htmlInput = vi.fn(() => ({ ref }));
+			render(
+				make({
+					label: "Qty",
+					value: 2,
+					disabled: true,
+					onChange: noop,
+					slotProps: { htmlInput },
+				}),
+			);
+			const input = field("Qty");
+			expect(ref.current).toBe(input);
+			expect(input).toHaveAttribute("inputmode", inputMode);
+			expect(htmlInput).toHaveBeenCalledWith(
+				expect.objectContaining({ disabled: true }),
+			);
+		});
+	});
+
 	describe("Enter in a form", () => {
 		/** a form with a submit button that records the value it submits */
 		const SubmitHost = function SubmitHost(props: {

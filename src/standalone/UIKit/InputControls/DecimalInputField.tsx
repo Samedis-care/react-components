@@ -7,6 +7,7 @@ import parseLocalizedNumber from "../../../utils/parseLocalizedNumber";
 import useCurrentLocale from "../../../utils/useCurrentLocale";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import useCommitOnEnter from "../../../utils/internal/useCommitOnEnter";
+import addSlotAttributes from "../../../utils/internal/addSlotAttributes";
 
 export interface DecimalInputFieldProps extends TextFieldWithHelpProps {
 	/**
@@ -148,13 +149,9 @@ const DecimalInputField = (
 						})
 					: muiProps.helperText
 			}
-			slotProps={{
-				...muiProps.slotProps,
-				htmlInput: {
-					...muiProps.slotProps?.htmlInput,
-					inputMode: "decimal",
-				},
-			}}
+			slotProps={addSlotAttributes(muiProps.slotProps, "htmlInput", {
+				inputMode: "decimal",
+			})}
 			inputMode={"decimal"}
 		/>
 	);

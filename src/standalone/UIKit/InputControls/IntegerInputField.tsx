@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from "react";
 import { TextFieldProps } from "@mui/material";
+import { useForkRef } from "@mui/material/utils";
 import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../TextFieldWithHelp";
@@ -8,6 +9,7 @@ import useCurrentLocale from "../../../utils/useCurrentLocale";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import getNumberSeparator from "../../../utils/getNumberSeparator";
 import isNegativeNumberText from "../../../utils/internal/isNegativeNumberText";
+import addSlotAttributes from "../../../utils/internal/addSlotAttributes";
 
 export interface IntegerInputFieldProps extends TextFieldWithHelpProps {
 	/**
@@ -124,6 +126,9 @@ const IntegerInputField = (
 		}
 	}
 	const { handleCursorChange, cursorInputRef } = useInputCursorFix(shownText);
+	// the caret fix's ref joins the caller's inputRef; a ref in slotProps.htmlInput
+	// reaches the input through TextFieldWithHelp, which sets it next to its own
+	const inputRef = useForkRef(cursorInputRef, muiProps.inputRef);
 
 	// on change handling
 	const handleChange = useCallback(
@@ -153,6 +158,7 @@ const IntegerInputField = (
 	return (
 		<TextFieldWithHelp
 			{...muiProps}
+			inputRef={inputRef}
 			value={shownText}
 			onChange={handleChange}
 			onBlur={handleBlur}
@@ -165,14 +171,9 @@ const IntegerInputField = (
 						})
 					: muiProps.helperText
 			}
-			slotProps={{
-				...muiProps.slotProps,
-				htmlInput: {
-					...muiProps.slotProps?.htmlInput,
-					ref: cursorInputRef,
-					inputMode: "numeric",
-				},
-			}}
+			slotProps={addSlotAttributes(muiProps.slotProps, "htmlInput", {
+				inputMode: "numeric",
+			})}
 			inputMode={"numeric"}
 		/>
 	);
