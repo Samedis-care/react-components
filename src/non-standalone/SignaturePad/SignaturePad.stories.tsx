@@ -4,7 +4,7 @@ import { Box, FormControl, FormHelperText, FormLabel } from "@mui/material";
 // eslint-disable-next-line import/no-unresolved
 import { expect, fn, mocked, spyOn, waitFor, within } from "storybook/test";
 import DialogContextProvider from "../../framework/DialogContextProvider";
-import SignaturePadCanvas, { SignaturePadCanvasProps } from "./SignaturePad";
+import SignaturePad, { SignaturePadProps } from "./SignaturePad";
 import { setFrameworkHistory } from "../../framework/History";
 import { createMemoryHistory } from "history";
 import {
@@ -27,7 +27,7 @@ const SAMPLE_SIGNATURE =
 const PAD_BOX = { width: 400, height: 200 };
 
 interface PadHostProps extends Omit<
-	SignaturePadCanvasProps,
+	SignaturePadProps,
 	"signature" | "setSignature"
 > {
 	/**
@@ -52,11 +52,7 @@ const PadHost = ({ initial, setSignature, ...props }: PadHostProps) => {
 	);
 	return (
 		<Box sx={PAD_BOX}>
-			<SignaturePadCanvas
-				{...props}
-				signature={signature}
-				setSignature={save}
-			/>
+			<SignaturePad {...props} signature={signature} setSignature={save} />
 		</Box>
 	);
 };

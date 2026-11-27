@@ -1,7 +1,19 @@
 import React from "react";
-import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
+import {
+	afterEach,
+	beforeAll,
+	describe,
+	expect,
+	expectTypeOf,
+	it,
+	vi,
+} from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import SignPad from "../../src/standalone/SignPad";
+import SignPad, {
+	SignPadClassKey,
+	SignPadProps,
+} from "../../src/standalone/SignPad";
+import type * as PackageRoot from "../../src";
 import ccI18n, { langs } from "../../src/i18n";
 import { waitForCcI18n } from "../waitForCcI18n";
 import userEvent from "@testing-library/user-event";
@@ -450,5 +462,22 @@ describe("SignPad tile", () => {
 				),
 		);
 		expect(missing, "locales without the text").toEqual([]);
+	});
+
+	const importTimeout = 90000;
+	it(
+		"[ISSUE-3467-ITEM-13] exports SignPad from the package root",
+		async () => {
+			const root = (await import("../../src")) as Record<string, unknown>;
+			expect(root.SignPad, "SignPad is missing from the package root").toBe(
+				SignPad,
+			);
+		},
+		importTimeout,
+	);
+	it("[ISSUE-3467-ITEM-13] exports SignPadProps and SignPadClassKey from the package root", () => {
+		// checked by tsc (tsconfig-test.json), not at runtime
+		expectTypeOf<PackageRoot.SignPadProps>().toEqualTypeOf<SignPadProps>();
+		expectTypeOf<PackageRoot.SignPadClassKey>().toEqualTypeOf<SignPadClassKey>();
 	});
 });

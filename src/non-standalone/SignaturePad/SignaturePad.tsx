@@ -14,10 +14,7 @@ import { SignDialog, SignPadDialogProps } from "../Dialog/SignPadDialog";
  * `penColor`, `setSignature`, `onBlur` and `canvasProps`. SignPad's
  * `openSignPad` is not one of them: the field opens its own dialog.
  */
-export interface SignaturePadCanvasProps extends Omit<
-	SignPadProps,
-	"openSignPad"
-> {
+export interface SignaturePadProps extends Omit<SignPadProps, "openSignPad"> {
 	/**
 	 * The name of the input
 	 */
@@ -64,7 +61,7 @@ export interface SignaturePadCanvasProps extends Omit<
  * DialogContextProvider is needed above it. `className` and `classes` style
  * the tile; a theme's `components.CcSignPadDialog` styles the dialog.
  */
-const SignaturePadCanvas = (props: SignaturePadCanvasProps) => {
+const SignaturePad = (props: SignaturePadProps) => {
 	const {
 		signature,
 		signerName,
@@ -140,4 +137,4 @@ const SignaturePadCanvas = (props: SignaturePadCanvasProps) => {
 	);
 };
 
-export default React.memo(SignaturePadCanvas);
+export default React.memo(SignaturePad);

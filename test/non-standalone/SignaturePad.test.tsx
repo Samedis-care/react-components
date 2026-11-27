@@ -7,6 +7,7 @@ import {
 	beforeEach,
 	describe,
 	expect,
+	expectTypeOf,
 	it,
 	vi,
 } from "vitest";
@@ -27,7 +28,10 @@ import DialogContextProvider, {
 import { waitForCcI18n } from "../waitForCcI18n";
 import { createTheme, Theme, ThemeProvider } from "@mui/material";
 
-import SignaturePad from "../../src/non-standalone/SignaturePad/SignaturePad";
+import SignaturePad, {
+	SignaturePadProps,
+} from "../../src/non-standalone/SignaturePad/SignaturePad";
+import type * as PackageRoot from "../../src";
 import {
 	SignDialog,
 	SignPadDialogProps,
@@ -305,6 +309,13 @@ describe("SignaturePad", () => {
 		expect(title().textContent, "title after the name arrived").toBe(
 			"Sign here (Bob)",
 		);
+	});
+	it("[ISSUE-3467-ITEM-13] exports SignaturePad and its props type SignaturePadProps from the package root", () => {
+		// checked by tsc (tsconfig-test.json), not at runtime
+		expectTypeOf<typeof PackageRoot.SignaturePad>().toEqualTypeOf<
+			typeof SignaturePad
+		>();
+		expectTypeOf<PackageRoot.SignaturePadProps>().toEqualTypeOf<SignaturePadProps>();
 	});
 });
 

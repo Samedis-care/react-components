@@ -24,6 +24,8 @@ export * from "./HowToBox";
 export { default as HowToBox } from "./HowToBox";
 export * from "./Icons";
 export * from "./UIKit";
+export * from "./SignPad";
+export { default as SignPad } from "./SignPad";
 export { default as SignalPortlet } from "./SignalPortlet";
 export { default as Notifications } from "./Notifications";
 export * from "./Routes";

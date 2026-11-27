@@ -5,11 +5,15 @@ import {
 	styled,
 	useThemeProps,
 } from "@mui/material";
-import { SignIcon } from "../../standalone";
+import { SignIcon } from "../Icons";
 import { Info as InfoIcon } from "@mui/icons-material";
 import useCCTranslations from "../../utils/useCCTranslations";
 import combineClassNames from "../../utils/combineClassNames";
 
+/**
+ * Props of {@link SignPad}. Theme defaults go in
+ * `theme.components.CcSignPad.defaultProps`.
+ */
 export interface SignPadProps {
 	/**
 	 * Disables the tile: neither a click nor Enter or Space calls
@@ -26,7 +30,9 @@ export interface SignPadProps {
 	 */
 	disabled?: boolean;
 	/**
-	 * The base64 string of signature, null while unsigned
+	 * The stored signature as an image URL, normally the
+	 * `data:image/png;base64,...` URL that SignaturePad saves; the tile shows
+	 * it scaled to fit. `null` or `""` while unsigned.
 	 */
 	signature: string | null;
 	/**
@@ -37,15 +43,22 @@ export interface SignPadProps {
 	 */
 	signerName?: string | null;
 	/**
-	 * custom CSS class to apply to root
+	 * A CSS class for the tile's root, next to `classes.root`. Default: none.
 	 */
 	className?: string;
 	/**
-	 * Custom styles
+	 * CSS classes for the tile's slots: `root`, `button` (the tile's
+	 * button, which fills it), `signTextDiv` (the pen icon and the text of an
+	 * unsigned tile), `imageDiv` (the box of the preview), `signPreview` (the
+	 * preview `<img>`) and `infoDiv` (the box of the info button). Default:
+	 * none.
 	 */
 	classes?: Partial<Record<SignPadClassKey, string>>;
 	/**
-	 * Open info dialog
+	 * Shows an info button ("More information") at the bottom right of the
+	 * tile and is called, without arguments, when it is clicked or activated
+	 * by keyboard; `openSignPad` is not called then. It works while
+	 * `disabled` too. Default: none, no info button.
 	 */
 	openInfo?: () => void;
 	/**
@@ -187,6 +200,10 @@ const InfoDiv = styled("div", { name: "CcSignPad", slot: "infoDiv" })({
 	bottom: 20,
 });
 
+/**
+ * Slot names of {@link SignPad} (theme name `CcSignPad`), see
+ * {@link SignPadProps.classes}
+ */
 export type SignPadClassKey =
 	"root" | "button" | "signTextDiv" | "imageDiv" | "signPreview" | "infoDiv";
 
@@ -303,4 +320,15 @@ const SignPad = (inProps: SignPadProps) => {
 		</SignPadDiv>
 	);
 };
+
+/**
+ * The display tile of a signature field: the stored signature scaled to
+ * fit, or, while unsigned, a pen icon and a prompt to sign. It does not
+ * draw: a click on the tile, or Enter or Space on its button, calls
+ * `openSignPad`, unless `disabled`. For a complete field with the drawing
+ * dialog use SignaturePad.
+ *
+ * The tile fills its parent (100% x 100%, at least 100px tall). Theme name
+ * `CcSignPad`.
+ */
 export default React.memo(SignPad);
