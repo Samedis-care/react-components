@@ -336,13 +336,14 @@ export const renderStepComponent = (
 
 /**
  * The real importer (CrudImport, not lazy) in a disableRouting CRUD with enableUserImport,
- * the stub grid and the crud.* permissions
+ * enableDevImport, the stub grid and the crud.* permissions
  * @param extra CRUD props to set, e.g. initialView "import" or "devimport", importConfig
  */
 export const wizardEl = (model: ModelUnknown, extra: CP = {}) =>
 	crudEl(model, {
 		disableRouting: true,
 		enableUserImport: true,
+		enableDevImport: true,
 		importUI: CrudImport as never,
 		initialView: "devimport",
 		...extra,

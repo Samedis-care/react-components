@@ -31,7 +31,7 @@ const meta: Meta = {
 		docs: {
 			description: {
 				component:
-					"`CrudImport` is the import wizard CRUD shows at `<url>/import` (guided) and `<url>/devimport` (unguided), or for the views `import`/`devimport` with `disableRouting`. It reads the first worksheet of one `.xlsx` file (step 1, Upload data), converts every row into a record with one function per model field (step 2, Connect data: JavaScript typed per field, unguided only; guided, CRUD's `importConfig` supplies the functions), validates every converted record (step 3, Validation & Review: Next only when no row has an error) and then creates (or, with `importUpdateKey`, updates) one record per row from the browser, ten requests at a time (step 4, Import data). Finish returns to the reloaded list. It runs inside a CRUD only and needs a parent with a height. These stories render the real importer (not lazy) in a `disableRouting` CRUD over the test model.",
+					"`CrudImport` is the import wizard CRUD shows at `<url>/import` (guided, with `enableUserImport`) and `<url>/devimport` (unguided, with `enableDevImport`), or for the views `import`/`devimport` with `disableRouting`. It reads the first worksheet of one `.xlsx` file (step 1, Upload data), converts every row into a record with one function per model field (step 2, Connect data: JavaScript typed per field, unguided only; guided, CRUD's `importConfig` supplies the functions), validates every converted record (step 3, Validation & Review: Next only when no row has an error) and then creates (or, with `importUpdateKey`, updates) one record per row from the browser, ten requests at a time (step 4, Import data). Finish returns to the reloaded list. It runs inside a CRUD only and needs a parent with a height. These stories render the real importer (not lazy) in a `disableRouting` CRUD over the test model.",
 			},
 		},
 	},
@@ -92,6 +92,7 @@ const ImporterStory = (props: {
 				exportPermission="crud.export"
 				disableRouting
 				enableUserImport
+				enableDevImport
 				importUI={CrudImport as never}
 				initialView={props.guided ? "import" : "devimport"}
 				importConfig={props.importConfig}

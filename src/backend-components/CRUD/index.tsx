@@ -205,12 +205,16 @@ export interface CrudProps<M extends ModelUnknown> {
 	 */
 	disableBackgroundGrid?: boolean;
 	/**
-	 * If routing is disabled: set the initial view (id, "new", "import" or null), defaults to null
+	 * If routing is disabled: set the initial view (id, "new", "import", "devimport" or null), defaults to null
 	 */
 	initialView?: string | null;
 	/**
-	 * Forbidden page to show if the user navigated to a URL he has no permissions for
-	 * If not set: Shows edit form in read-only mode
+	 * Forbidden page to show if the user navigated to a URL he has no permissions for,
+	 * and for an import view ("import" or "devimport", also with disableRouting) that is
+	 * not enabled (enableUserImport, enableDevImport) or that the user may not import in
+	 * (see enableUserImport)
+	 * If not set: Shows edit form in read-only mode and an enabled import view to every
+	 * user; an import view that is not enabled shows nothing
 	 */
 	forbiddenPage?: React.ComponentType;
 	/**
@@ -218,9 +222,27 @@ export interface CrudProps<M extends ModelUnknown> {
 	 */
 	routeComponent?: React.ComponentType<RouteProps>;
 	/**
-	 * Enable Import button in Grid
+	 * Enables the import: the grid's Import, for users with newPermission (and
+	 * editPermission when importUpdateKey is set), and the view it opens,
+	 * `<url>/import` (with disableRouting the view "import"). Without it that
+	 * view does not exist: it shows forbiddenPage, or nothing.
+	 * @remarks The library's importer is the guided one with importConfig only;
+	 *          without importConfig it is the unguided one (see enableDevImport)
+	 * @default false
 	 */
 	enableUserImport?: boolean;
+	/**
+	 * Enables the unguided developer importer at `<url>/devimport` (with
+	 * disableRouting the view "devimport"), for users who may import (see
+	 * enableUserImport); the grid offers no button for it. Its Connect data step
+	 * runs the JavaScript the user types for each field, and its last step creates
+	 * (or updates) the records through the connector: a tool for developers
+	 * working out an importConfig, not for end users, e.g.
+	 * `enableDevImport={process.env.NODE_ENV === "development"}`. Without it
+	 * that view does not exist: it shows forbiddenPage, or nothing.
+	 * @default false
+	 */
+	enableDevImport?: boolean;
 	/**
 	 * Import config (should be set if enableUserImport set)
 	 */
@@ -353,6 +375,7 @@ const CRUD = <M extends ModelUnknown>(
 		disableBackgroundGrid,
 		forbiddenPage: ForbiddenPage,
 		enableUserImport: requestEnableUserImport,
+		enableDevImport,
 		importConfig,
 		importUpdateKey,
 		importHowTo,
@@ -560,17 +583,25 @@ const CRUD = <M extends ModelUnknown>(
 		</Suspense>
 	);
 
-	const importer = (guided: boolean) => (
-		<ImportUI
-			model={props.model}
-			importConfig={importConfig}
-			updateKey={importUpdateKey}
-			updateKeyAdditionalFilters={importUpdateKeyAdditionalFilters}
-			howTo={importHowTo}
-			validate={importValidate}
-			guided={guided}
-		/>
-	);
+	const importer = (guided: boolean) => {
+		// an import view exists only where the app enables it, routed or not: otherwise its
+		// id is still reserved (no record page for it), and it is forbidden or empty
+		const enabled = guided ? requestEnableUserImport : enableDevImport;
+		if (!enabled || (!hasImportPermission && ForbiddenPage)) {
+			return ForbiddenPage ? <ForbiddenPage /> : <></>;
+		}
+		return (
+			<ImportUI
+				model={props.model}
+				importConfig={importConfig}
+				updateKey={importUpdateKey}
+				updateKeyAdditionalFilters={importUpdateKeyAdditionalFilters}
+				howTo={importHowTo}
+				validate={importValidate}
+				guided={guided}
+			/>
+		);
+	};
 
 	const lastFormId = useRef<string | null>(null);
 	const formKey = useRef(Date.now().toString(16));
@@ -667,26 +698,8 @@ const CRUD = <M extends ModelUnknown>(
 					)}
 					{props.children && (
 						<Routes>
-							<RouteComponent
-								path={`import/*`}
-								element={
-									hasImportPermission || !ForbiddenPage ? (
-										importer(true)
-									) : (
-										<ForbiddenPage />
-									)
-								}
-							/>
-							<RouteComponent
-								path={`devimport/*`}
-								element={
-									hasImportPermission || !ForbiddenPage ? (
-										importer(false)
-									) : (
-										<ForbiddenPage />
-									)
-								}
-							/>
+							<RouteComponent path={`import/*`} element={importer(true)} />
+							<RouteComponent path={`devimport/*`} element={importer(false)} />
 							<RouteComponent
 								path={`:id/*`}
 								element={
