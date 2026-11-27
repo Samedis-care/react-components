@@ -268,6 +268,8 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 				enableResize
 				startDrag={startDrag}
 				autoResize={autoResize}
+				sortable={!!sortable}
+				onSort={onColumnSortChange}
 				sort={sort}
 				sortOrder={sortOrder}
 				filterable={!!filterable}

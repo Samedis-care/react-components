@@ -13,7 +13,10 @@ import React, {
 } from "react";
 import {
 	Box,
+	ButtonBase,
+	buttonBaseClasses,
 	Collapse,
+	CSSObject,
 	Divider,
 	FormControlLabelProps,
 	Grid,
@@ -57,6 +60,7 @@ import { withDataGridPersistGate } from "./PersistGate";
 import { IDataGridContentSelectRowViewProps } from "./Content/SelectRowView";
 import combineClassNames from "../../utils/combineClassNames";
 import Checkbox from "../UIKit/Checkbox";
+import focusRing from "../../utils/internal/focusRing";
 import ComponentWithLabel, {
 	ComponentWithLabelProps,
 } from "../UIKit/ComponentWithLabel";
@@ -609,7 +613,13 @@ export interface IDataGridColumnDef {
 	headerName: string;
 	/**
 	 * Optional label override for column header
-	 * @remarks You should supply a string unless you want to customize this
+	 * @remarks You should supply a string unless you want to customize this.
+	 * In a sortable column the label is the content of the header's sort
+	 * button (a `<button>`), so it may hold phrasing content only: text,
+	 * `<br>`, spans, icons; no links, buttons or other controls. In a column
+	 * that does not sort, a string label is a tab stop, so keyboard focus
+	 * shows its tooltip; an element is rendered as it is, and a link or button
+	 * in it shows the tooltip when it has keyboard focus.
 	 */
 	headerLabel?: NonNullable<React.ReactNode>;
 	/**
@@ -633,7 +643,11 @@ export interface IDataGridColumnDef {
 	 */
 	filterable?: boolean;
 	/**
-	 * Can the column be sorted?
+	 * Can the column be sorted? Its header label is then a sort button. A
+	 * click on the header, or Enter or Space on the button, steps the column
+	 * from unsorted to ascending (and makes it the only sort), to descending,
+	 * to unsorted. Shift+click and Shift+Enter add the column as a further
+	 * sort, or remove it from the sort.
 	 */
 	sortable?: boolean;
 	/**
@@ -1233,18 +1247,75 @@ export const DataGridFilterClearButton = styled(IconButton, {
 	padding: 0,
 }) as typeof IconButton;
 
+/**
+ * Theme slot `columnHeaderLabel`: the label's place in a column's header. It
+ * holds the sort button (`columnHeaderSortButton`) of a sortable column, else
+ * the label's text (`columnHeaderLabelText`); either cuts a long label off
+ * with an ellipsis.
+ */
 export const DataGridColumnHeaderLabel = styled(Grid, {
 	name: "CcDataGrid",
 	slot: "columnHeaderLabel",
 })({
-	textOverflow: "ellipsis",
+	// shrinks below its text's width, which the button or text cuts off: the
+	// label itself clips nothing, so the focus ring around them shows in full
+	minWidth: 0,
 	whiteSpace: "nowrap",
-	overflow: "hidden",
 	userSelect: "none",
 	"&:hover": {
 		pointerEvents: "auto",
 	},
 }) as typeof Grid;
+
+// the label's text, as the sort button and as the text of a column that does
+// not sort: cut off with an ellipsis, and 4px wider than the label on both
+// sides, so the focus ring drawn inside its edges keeps clear of the text
+// while the text stays where it is
+const columnHeaderLabelTextStyles: CSSObject = {
+	display: "block",
+	overflow: "hidden",
+	textOverflow: "ellipsis",
+	padding: "0 4px",
+	margin: "0 -4px",
+};
+
+/**
+ * Theme slot `columnHeaderSortButton`: the label of a sortable column, as a
+ * `<button>` named with the label's text. Enter and Space sort the column,
+ * Shift+Enter adds it as a further sort (see IDataGridColumnDef.sortable);
+ * keyboard focus shows the label's tooltip and a focus ring.
+ */
+export const DataGridColumnHeaderSortButton = styled(ButtonBase, {
+	name: "CcDataGrid",
+	slot: "columnHeaderSortButton",
+})(({ theme }) => ({
+	...columnHeaderLabelTextStyles,
+	// a button is only as wide as its content by itself
+	width: "calc(100% + 8px)",
+	// the header's text, as without the button
+	font: "inherit",
+	letterSpacing: "inherit",
+	textAlign: "inherit",
+	textTransform: "inherit",
+	cursor: "inherit",
+	[`&.${buttonBaseClasses.focusVisible}`]: focusRing(theme, -2),
+})) as typeof ButtonBase;
+
+/**
+ * Theme slot `columnHeaderLabelText`: the label of a column that does not
+ * sort. A string label is a tab stop, so keyboard focus shows its tooltip
+ * (and the full text of a label cut off) and a focus ring.
+ */
+export const DataGridColumnHeaderLabelText: React.ComponentType<
+	React.HTMLAttributes<HTMLSpanElement>
+> = styled("span", {
+	name: "CcDataGrid",
+	slot: "columnHeaderLabelText",
+})(({ theme }) => ({
+	...columnHeaderLabelTextStyles,
+	// the sort button's ring: the theme's, else CC's inside the edges
+	"&:focus-visible": focusRing(theme, -2) ?? theme.focusVisible,
+}));
 
 export const DataGridColumnHeaderResizer = styled(Grid, {
 	name: "CcDataGrid",
@@ -1421,6 +1492,8 @@ export type DataGridClassKey =
 	| "filterBarBox"
 	| "filterClearBtn"
 	| "columnHeaderLabel"
+	| "columnHeaderSortButton"
+	| "columnHeaderLabelText"
 	| "columnHeaderResizer"
 	| "columnHeaderSortIcon"
 	| "columnHeaderContentWrapper"

@@ -1488,3 +1488,111 @@ export const Issue3493Item17ClearFiltersFocusesSearchOnPhone: Story = {
 		await expect(searchButton).toHaveFocus();
 	},
 };
+
+const COLUMNS_LONG_HEADERS: IDataGridColumnDef[] = [
+	...COLUMNS,
+	{
+		field: "notes",
+		headerName: "Notes about the person in detail",
+		type: "string",
+		sortable: true,
+		width: [120, 120],
+	},
+	{
+		field: "remarks",
+		headerName: "Remarks of the team lead",
+		type: "string",
+		width: [120, 120],
+	},
+];
+
+/**
+ * ISSUE-3493-ITEM-14: every sortable header has a sort button named with the
+ * header's full text. Tab reaches it, Enter sorts, Shift+Enter adds a sort as
+ * Shift+click does, and Space steps the sort once. Focus on a cut-off header,
+ * sortable or not, shows its full text in the tooltip.
+ */
+export const Issue3493Item14HeaderSortsByKeyboard: Story = {
+	args: {
+		columns: COLUMNS_LONG_HEADERS,
+		loadData: fn(makeLoadData()),
+		// names the search field, so axe checks the grid without its finding there
+		searchPlaceholder: "Search people",
+	},
+	parameters: { a11y: { test: "error" } },
+	play: async ({ args, canvas, canvasElement }) => {
+		const loadData = mocked(args.loadData);
+		const body = within(canvasElement.ownerDocument.body);
+		const lastSort = () => loadData.mock.calls.at(-1)?.[0].sort;
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+
+		const name = canvas.getByRole("button", { name: "Name" });
+		const age = canvas.getByRole("button", { name: "Age" });
+		// Tab from the Name header's filter button reaches the Age header
+		canvas.getAllByRole("button", { name: "Filter" })[0].focus();
+		await userEvent.tab();
+		await expect(age).toHaveFocus();
+
+		// Enter sorts by age, ascending; focus stays while the rows reload
+		await userEvent.keyboard("{Enter}");
+		await waitFor(() =>
+			expect(lastSort()).toEqual([{ field: "age", direction: 1 }]),
+		);
+		await waitFor(() =>
+			expect(
+				canvas.getAllByText(/^(Alice Müller|Dave Brown)$/)[0],
+			).toHaveTextContent("Dave Brown"),
+		);
+		await expect(age).toHaveFocus();
+
+		// Shift+Enter on Name adds a second sort, as Shift+click does
+		name.focus();
+		await userEvent.keyboard("{Shift>}{Enter}{/Shift}");
+		await waitFor(() =>
+			expect(lastSort()).toEqual([
+				{ field: "age", direction: 1 },
+				{ field: "name", direction: 1 },
+			]),
+		);
+
+		// Space steps Name's sort once: ascending to descending, not past it
+		await userEvent.keyboard(" ");
+		await waitFor(() =>
+			expect(lastSort()).toEqual([
+				{ field: "age", direction: 1 },
+				{ field: "name", direction: -1 },
+			]),
+		);
+		await expect(name).toHaveFocus();
+
+		// a cut-off sortable header: its button has the full text as its name,
+		// and focus shows the full text in the tooltip
+		const notes = canvas.getByRole("button", {
+			name: "Notes about the person in detail",
+		});
+		await expect(notes.scrollWidth).toBeGreaterThan(notes.clientWidth);
+		notes.focus();
+		await expect(
+			await body.findByRole(
+				"tooltip",
+				{ name: "Notes about the person in detail" },
+				{ timeout: 3000 },
+			),
+		).toBeVisible();
+
+		// a cut-off header that does not sort: Tab reaches its label, and focus
+		// shows the full text too
+		await userEvent.tab();
+		const remarks = canvasElement.ownerDocument.activeElement as HTMLElement;
+		await expect(remarks.closest(".CcDataGrid-headerCell")).not.toBeNull();
+		await expect(remarks).toHaveTextContent(/^Remarks of the team lead$/);
+		await expect(remarks.scrollWidth).toBeGreaterThan(remarks.clientWidth);
+		await expect(
+			await body.findByRole(
+				"tooltip",
+				{ name: "Remarks of the team lead" },
+				{ timeout: 3000 },
+			),
+		).toBeVisible();
+	},
+};

@@ -12,7 +12,9 @@ import {
 	DataGridColumnHeaderFilterPopupEnum,
 	DataGridColumnHeaderFilterPopupId,
 	DataGridColumnHeaderLabel,
+	DataGridColumnHeaderLabelText,
 	DataGridColumnHeaderResizer,
+	DataGridColumnHeaderSortButton,
 	DataGridColumnHeaderSortIcon,
 	IDataGridColumnDef,
 	useDataGridProps,
@@ -42,6 +44,18 @@ export interface IDataGridContentColumnHeaderContentProps {
 	 * Automatic resize callback
 	 */
 	autoResize: () => void;
+	/**
+	 * Can the column be sorted? The label is then a sort button, else a tab
+	 * stop when it is a string.
+	 */
+	sortable: boolean;
+	/**
+	 * Called when Enter or Space is pressed on the sort button: steps the
+	 * column's sort as a click on the header does
+	 * @param additional Shift was held: add or remove the column as a further
+	 * sort, as Shift+click does
+	 */
+	onSort: (additional: boolean) => void;
 	/**
 	 * The currently active sort
 	 */
@@ -112,6 +126,40 @@ const ColumnHeaderContent = (
 		(evt: SyntheticEvent<unknown>) => evt.stopPropagation(),
 		[],
 	);
+	// Enter (when pressed) and Space (when released) sort here, not through the
+	// click the button fires for them: that click does not carry Shift in every
+	// browser. preventDefault keeps the button from firing it, so the header's
+	// click handler does not sort a second time. Clicks with the pointer or
+	// from assistive technology reach the header's click handler as before.
+	const { onSort } = props;
+	const onSortButtonKeyDown = useCallback(
+		(evt: React.KeyboardEvent<HTMLButtonElement>) => {
+			if (evt.key !== "Enter" || evt.target !== evt.currentTarget) return;
+			evt.preventDefault();
+			// a held Enter sorts once
+			if (!evt.repeat) onSort(evt.shiftKey);
+		},
+		[onSort],
+	);
+	const onSortButtonKeyUp = useCallback(
+		(evt: React.KeyboardEvent<HTMLButtonElement>) => {
+			if (evt.key !== " " || evt.target !== evt.currentTarget) return;
+			evt.preventDefault();
+			onSort(evt.shiftKey);
+		},
+		[onSort],
+	);
+
+	const label =
+		typeof props.headerName === "string"
+			? props.headerName.split("\n").map((text, index, arr) => (
+					// keyed by position: two lines can have the same text
+					<React.Fragment key={index}>
+						{text}
+						{index == arr.length - 1 ? undefined : <br />}
+					</React.Fragment>
+				))
+			: props.headerName;
 
 	const CurrentFilterIcon =
 		props.filter && props.filter.value1
@@ -135,17 +183,26 @@ const ColumnHeaderContent = (
 					key={"header"}
 				>
 					<Tooltip title={props.headerName}>
-						<span>
-							{typeof props.headerName === "string"
-								? props.headerName.split("\n").map((text, index, arr) => (
-										// keyed by position: two lines can have the same text
-										<React.Fragment key={index}>
-											{text}
-											{index == arr.length - 1 ? undefined : <br />}
-										</React.Fragment>
-									))
-								: props.headerName}
-						</span>
+						{props.sortable ? (
+							<DataGridColumnHeaderSortButton
+								className={classes?.columnHeaderSortButton}
+								onKeyDown={onSortButtonKeyDown}
+								onKeyUp={onSortButtonKeyUp}
+								disableRipple
+							>
+								{label}
+							</DataGridColumnHeaderSortButton>
+						) : (
+							<DataGridColumnHeaderLabelText
+								className={classes?.columnHeaderLabelText}
+								// the keyboard's way to the tooltip, with the full text of
+								// a label cut off. An element keeps what it is: a focusable
+								// element in it shows the tooltip
+								tabIndex={typeof props.headerName === "string" ? 0 : undefined}
+							>
+								{label}
+							</DataGridColumnHeaderLabelText>
+						)}
 					</Tooltip>
 				</DataGridColumnHeaderLabel>
 				<DataGridColumnHeaderSortIcon className={classes?.columnHeaderSortIcon}>

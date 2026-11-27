@@ -488,6 +488,72 @@ describe("ColumnHeader: sorting", () => {
 	});
 });
 
+describe("ColumnHeader: keyboard", () => {
+	it("[ISSUE-3493-ITEM-14] a sortable header's label is a sort button named with its text; a text label that does not sort is a tab stop", async () => {
+		const cols: IDataGridColumnDef[] = [
+			...COLUMNS,
+			{
+				field: "device",
+				headerName: "Device",
+				headerLabel: <a href="#device">Device A</a>,
+				type: "string",
+			},
+		];
+		const { container } = render(<Grid columns={cols} />);
+		await screen.findByText("Alice");
+		expect(screen.getByRole("button", { name: "Name" }).tagName).toBe("BUTTON");
+		expect(screen.getByRole("button", { name: "Role" })).toHaveAttribute(
+			"type",
+			"button",
+		);
+		expect(screen.queryByRole("button", { name: "Note" })).toBeNull();
+		expect(
+			within(headerWrapper(container, "note")).getByText("Note"),
+		).toHaveAttribute("tabindex", "0");
+		// an element label is rendered as it is: its link is the tab stop
+		const link = within(headerWrapper(container, "device")).getByRole("link");
+		expect(link.parentElement).not.toHaveAttribute("tabindex");
+	});
+
+	it("[ISSUE-3493-ITEM-14] Enter and Space on a sort button sort the column, Shift adds it as a further sort", async () => {
+		vi.useFakeTimers({ shouldAdvanceTime: true });
+		const loadData = loadSpy();
+		render(<Grid loadData={loadData} />);
+		await idle();
+		const name = screen.getByRole("button", { name: "Name" });
+		const role = screen.getByRole("button", { name: "Role" });
+		loadData.mockClear();
+		// false: the default is prevented, so the button fires no click that
+		// would reach the header's click handler and sort a second time
+		expect(fireEvent.keyDown(name, { key: "Enter" })).toBe(false);
+		passDebounce();
+		await idle();
+		expect(loadData.mock.calls.at(-1)?.[0].sort).toEqual([
+			{ field: "name", direction: 1 },
+		]);
+		fireEvent.keyDown(role, { key: "Enter", shiftKey: true });
+		passDebounce();
+		await idle();
+		expect(loadData.mock.calls.at(-1)?.[0].sort).toEqual([
+			{ field: "name", direction: 1 },
+			{ field: "role", direction: 1 },
+		]);
+		// a held Enter repeats its keydown: the sort steps once
+		fireEvent.keyDown(role, { key: "Enter", repeat: true });
+		expect(probe!.columnState.role.sort).toBe(1);
+		// Space sorts when released
+		fireEvent.keyDown(role, { key: " " });
+		expect(probe!.columnState.role.sort).toBe(1);
+		expect(fireEvent.keyUp(role, { key: " " })).toBe(false);
+		passDebounce();
+		await idle();
+		expect(loadData.mock.calls.at(-1)?.[0].sort).toEqual([
+			{ field: "name", direction: 1 },
+			{ field: "role", direction: -1 },
+		]);
+	});
+});
+
 describe("Content / ColumnHeader: widths", () => {
 	it("[ISSUE-3493-ITEM-2] a resize that ends over the column's own header does not sort it", async () => {
 		vi.useFakeTimers({ shouldAdvanceTime: true });

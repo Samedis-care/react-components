@@ -53,6 +53,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-27 | [A disabled ActionButton is filled with `action.disabled`](2026-11-27-action-button-disabled-fill.md) | behavior |
 | 2026-11-27 | [A CRUD serves its importer only where the app enables it: `import` with enableUserImport, `devimport` with enableDevImport](2026-11-27-crud-import-views-need-enable.md) | behavior |
 | 2026-11-27 | [A create form left while it saves no longer pulls the user back to the saved record](2026-11-27-crud-save-new-left-during-save.md) | behavior |
+| 2026-11-27 | [DataGrid column header labels are tab stops: a sortable column's label is its sort button](2026-11-27-data-grid-header-labels-are-tab-stops.md) | behavior |
 | 2026-11-27 | [With sortLimit 0 a plain header click sorts the grid](2026-11-27-data-grid-sort-limit-0-plain-click-sorts.md) | behavior |
 | 2026-11-27 | [SubActionButton takes `color`, and an icon keeps its own color](2026-11-27-sub-action-button-color.md) | behavior, DOM |
 | 2026-11-27 | [A running export entry is unavailable, and a ready or failed export is announced](2026-11-27-data-grid-export-progress-and-results-announced.md) | behavior |
