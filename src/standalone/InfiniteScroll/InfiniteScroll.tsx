@@ -40,6 +40,16 @@ export interface InfiniteScrollProps extends React.HTMLAttributes<HTMLDivElement
 	 * - when a scroll event finds the container at its top;
 	 * - to fill a short list that has no `loadMoreBottom` (see there).
 	 *
+	 * It is also called when focus moves to the first row the keyboard reaches
+	 * in the container, however far the container is from its top: an element
+	 * before which the container has no tab stop, e.g. the first row's button
+	 * after a heading or empty days. So the next Shift+Tab reaches the new rows
+	 * instead of leaving the list. In a widget that moves focus with the arrow
+	 * keys (a menu, listbox or grid whose items have a negative `tabIndex`),
+	 * that is its first item: an element before the focused one with the same
+	 * tag and `role` counts like a tab stop. Focus on the scroll container
+	 * itself does not count.
+	 *
 	 * Prepend the new items to `children`. While the container is at its top,
 	 * the component keeps the rows in view where they are, so the new items
 	 * are added out of view above them and the user scrolls up into them;
@@ -51,9 +61,9 @@ export interface InfiniteScrollProps extends React.HTMLAttributes<HTMLDivElement
 	 * stay reachable.
 	 *
 	 * A call that waits for `callBackDebounce` is only made if, once the wait
-	 * is over, the content still does not fill the container or the container
-	 * is still at its top; it is not made while the container is hidden, and
-	 * waits while `loading` is set.
+	 * is over, the content still does not fill the container, the container
+	 * is still at its top, or focus is still on that first row; it is not made
+	 * while the container is hidden, and waits while `loading` is set.
 	 *
 	 * The return value is ignored: a promise it returns is not awaited, so an
 	 * async callback handles its own errors. Pass `loading` while the load
@@ -136,7 +146,8 @@ export interface InfiniteScrollProps extends React.HTMLAttributes<HTMLDivElement
 	 * reaches the last row, see `loadMoreBottom`). A negative number or `NaN`
 	 * counts as `0`. Can be changed after mount.
 	 *
-	 * `loadMoreTop` is called at the top, whatever this value.
+	 * `loadMoreTop` is called at the top (or when focus reaches the first row,
+	 * see `loadMoreTop`), whatever this value.
 	 * @default 250
 	 */
 	threshold?: number;
@@ -379,17 +390,26 @@ const canTakeFocus = (element: HTMLElement): boolean =>
 		element.checkVisibility({ visibilityProperty: true }));
 
 /**
+ * Can the keyboard move focus from `focused` to `candidate`? Tab and
+ * Shift+Tab reach a tab stop (an element that can take focus, with a tab
+ * index of 0 or more); the arrow keys of a widget that moves focus itself (a
+ * menu, listbox or grid whose items have a negative `tabIndex`) reach its
+ * other items, elements with the same tag and `role` as `focused`.
+ */
+const isFocusTarget = (focused: Element, candidate: HTMLElement): boolean =>
+	canTakeFocus(candidate) &&
+	(getTabIndex(candidate) >= 0 ||
+		(candidate.tagName === focused.tagName &&
+			candidate.getAttribute("role") === focused.getAttribute("role")));
+
+/**
  * Can the keyboard move focus from `focused` to an element after it in the
- * scroll container? Tab reaches a tab stop (an element that can take focus,
- * with a tab index of 0 or more); the arrow keys of a widget that moves focus
- * itself (a menu, listbox or grid whose items have a negative `tabIndex`)
- * reach its next item, an element with the same tag and `role` as `focused`.
+ * scroll container (see `isFocusTarget`)?
  */
 const hasFocusTargetAfter = (
 	wrapper: HTMLElement,
 	focused: Element,
 ): boolean => {
-	const role = focused.getAttribute("role");
 	const candidates = wrapper.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
 	// from the end, so that a long list is searched no further than its last
 	// tab stop
@@ -403,16 +423,47 @@ const hasFocusTargetAfter = (
 		) {
 			return false;
 		}
-		if (!canTakeFocus(candidate)) continue;
-		if (getTabIndex(candidate) >= 0) return true;
-		if (
-			candidate.tagName === focused.tagName &&
-			candidate.getAttribute("role") === role
-		) {
-			return true;
-		}
+		if (isFocusTarget(focused, candidate)) return true;
 	}
 	return false;
+};
+
+/**
+ * Can the keyboard move focus from `focused` to an element before it in the
+ * scroll container (see `isFocusTarget`)? An element that contains `focused`
+ * comes before it, as Shift+Tab goes from an element to its container.
+ */
+const hasFocusTargetBefore = (
+	wrapper: HTMLElement,
+	focused: Element,
+): boolean => {
+	const candidates = wrapper.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
+	// from the start, so that a long list is searched no further than its
+	// first tab stop
+	for (let i = 0; i < candidates.length; i++) {
+		const candidate = candidates[i];
+		if (
+			!(
+				focused.compareDocumentPosition(candidate) &
+				Node.DOCUMENT_POSITION_PRECEDING
+			)
+		) {
+			return false;
+		}
+		if (isFocusTarget(focused, candidate)) return true;
+	}
+	return false;
+};
+
+/**
+ * The element in the scroll container that has focus; `null` while focus is
+ * on the container itself or outside it
+ */
+const getFocusedRow = (wrapper: HTMLElement): Element | null => {
+	const focused = wrapper.ownerDocument.activeElement;
+	return focused && focused !== wrapper && wrapper.contains(focused)
+		? focused
+		: null;
 };
 
 /**
@@ -422,13 +473,19 @@ const hasFocusTargetAfter = (
  * the list then.
  */
 const isFocusOnLastRow = (wrapper: HTMLElement): boolean => {
-	const focused = wrapper.ownerDocument.activeElement;
-	return (
-		!!focused &&
-		focused !== wrapper &&
-		wrapper.contains(focused) &&
-		!hasFocusTargetAfter(wrapper, focused)
-	);
+	const focused = getFocusedRow(wrapper);
+	return !!focused && !hasFocusTargetAfter(wrapper, focused);
+};
+
+/**
+ * Is focus on the first row the keyboard reaches in the scroll container: on
+ * an element in it (not the container itself) before which it has nothing
+ * the keyboard can move focus to (see `hasFocusTargetBefore`)? The next
+ * Shift+Tab leaves the rows then.
+ */
+const isFocusOnFirstRow = (wrapper: HTMLElement): boolean => {
+	const focused = getFocusedRow(wrapper);
+	return !!focused && !hasFocusTargetBefore(wrapper, focused);
 };
 
 /**
@@ -684,10 +741,10 @@ const loadTopIfDue = (scroll: ScrollState): void => {
  * Makes a call requested by `requestLoad`. The callback is read from the
  * props now, so it is the one of the latest commit. A call is only made if
  * the content still needs it: a request made while the content was short,
- * or while the container was near that end (or focus on its last row), is
- * dropped once content that arrived in the meantime fills the container and
- * moves that end away (or focus moved on), and one is not made while the
- * container is hidden (`pauseFillWhileHidden`).
+ * or while the container was near that end (or focus on its first or last
+ * row), is dropped once content that arrived in the meantime fills the
+ * container and moves that end away (or focus moved on), and one is not made
+ * while the container is hidden (`pauseFillWhileHidden`).
  * While calls are held (see `holdsLoads`), the call is held and requested
  * again once they no longer are. A fill call that is dropped because the
  * content now fills the container (rows that grew on their own) lets the due
@@ -703,7 +760,7 @@ const callLoad = (scroll: ScrollState, name: LoadCallbackName): void => {
 	const threshold = getThreshold(scroll.props);
 	const atEnd =
 		name === "loadMoreTop"
-			? isAtTop(wrapper)
+			? isAtTop(wrapper) || isFocusOnFirstRow(wrapper)
 			: isNearBottom(wrapper, threshold) || isFocusOnLastRow(wrapper);
 	if (isFilled(wrapper, threshold) && !atEnd) {
 		loadTopIfDue(scroll);
@@ -740,16 +797,18 @@ const handleResize = (scroll: ScrollState): void => {
 };
 
 /**
- * Requests `loadMoreBottom` when focus moves to the last row the keyboard
- * reaches (see `isFocusOnLastRow`), so that the next Tab reaches the new
- * rows rather than leaving the list
+ * Requests `loadMoreTop` when focus moves to the first row the keyboard
+ * reaches (see `isFocusOnFirstRow`), and `loadMoreBottom` when it moves to
+ * the last one (see `isFocusOnLastRow`), so that the next Shift+Tab or Tab
+ * reaches the new rows rather than leaving the list
  */
 const handleFocusIn = (scroll: ScrollState): void => {
-	if (
-		scroll.wrapper &&
-		scroll.props.loadMoreBottom &&
-		isFocusOnLastRow(scroll.wrapper)
-	) {
+	const { wrapper, props } = scroll;
+	if (!wrapper) return;
+	if (props.loadMoreTop && isFocusOnFirstRow(wrapper)) {
+		requestLoad(scroll, "loadMoreTop");
+	}
+	if (props.loadMoreBottom && isFocusOnLastRow(wrapper)) {
 		requestLoad(scroll, "loadMoreBottom");
 	}
 };

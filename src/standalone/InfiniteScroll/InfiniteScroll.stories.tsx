@@ -931,3 +931,97 @@ export const Issue3471Item11LoadsWhenTabbingPastTallTrailingContent: Story = {
 		await expect(canvas.getByRole("button", { name: "Item 21" })).toHaveFocus();
 	},
 };
+
+// ─── Focusable rows after content without focusable elements ──────────────────
+
+/**
+ * Content without focusable elements before the rows of a page, e.g. a
+ * schedule week's heading and the empty days before its first entry
+ */
+const LeadingBlock = styled("div")({
+	height: 200,
+	padding: 8,
+	boxSizing: "border-box",
+	fontSize: 14,
+});
+
+/** The rows of a page of `PagedRowsStory` */
+const ROWS_PER_PAGE = 10;
+
+/**
+ * Pages of 10 rows that are buttons of 30px, each after 200px of content
+ * without focusable elements, in a 300px container between two buttons. It
+ * starts with pages 10 and 11 (Row 100 to Row 119); loadMoreTop adds the page
+ * before the first one.
+ */
+const PagedRowsStory = ({ onLoadTop }: { onLoadTop?: () => void }) => {
+	const [firstPage, setFirstPage] = useState(10);
+
+	const loadMoreTop = useCallback(() => {
+		onLoadTop?.();
+		setFirstPage((prev) => prev - 1);
+	}, [onLoadTop]);
+
+	return (
+		<Box sx={{ width: 300 }}>
+			<button type="button">Before the list</button>
+			<Scroller role="region" aria-label="Rows" loadMoreTop={loadMoreTop}>
+				{makeItems(firstPage, 12 - firstPage).map((page) => (
+					<React.Fragment key={page}>
+						<LeadingBlock>
+							Page {page}: content without focusable elements
+						</LeadingBlock>
+						{makeItems(page * ROWS_PER_PAGE, ROWS_PER_PAGE).map((n) => (
+							<RowButton key={n} type="button">
+								Row {n}
+							</RowButton>
+						))}
+					</React.Fragment>
+				))}
+			</Scroller>
+			<button type="button">After the list</button>
+		</Box>
+	);
+};
+
+export const Issue3471Item14LoadsWhenShiftTabbingPastLeadingContent: Story = {
+	args: { loadMoreTop: fn() },
+	render: (args) => <PagedRowsStory onLoadTop={args.loadMoreTop} />,
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"Each page starts with 200px without focusable elements, as a schedule week starts with its heading and the empty days before its first entry, followed by 10 rows that are buttons. The list opens at Row 100 with the page of Row 90 loaded above it. Shift+Tab from below up to Row 90, the first loaded row, scrolls it into view but not to the very top, so scrolling does not load; focus on the first row the keyboard reaches does, and the next Shift+Tab reaches the last row of the new page instead of leaving the list.",
+			},
+		},
+		a11y: { test: "error" },
+	},
+	play: async ({ args, canvasElement }) => {
+		const canvas = within(canvasElement);
+		const scroller = canvas.getByRole("region", { name: "Rows" });
+		// the list opens at Row 100, with the page above it loaded
+		await canvas.findByRole("button", { name: "Row 90" });
+		await expect(args.loadMoreTop).toHaveBeenCalledTimes(1);
+
+		canvas.getByRole("button", { name: "After the list" }).focus();
+		// up through each row, which is scrolled into view, to Row 90
+		for (let i = 0; i < 30; i++) await userEvent.tab({ shift: true });
+		const firstRow = canvas.getByRole("button", { name: "Row 90" });
+		await expect(firstRow).toHaveFocus();
+		// precondition: the list is not at its very top, the content of its first
+		// page is above Row 90
+		await expect(scroller.scrollTop).toBeGreaterThanOrEqual(1);
+		// reaching the first loaded row by keyboard loads the page above it before
+		// focus can leave the list
+		await waitFor(() => expect(args.loadMoreTop).toHaveBeenCalledTimes(2));
+		await canvas.findByRole("button", { name: "Row 89" });
+		await expect(firstRow).toHaveFocus();
+		// the new page is added out of view, the focused row stays in view
+		const row = firstRow.getBoundingClientRect();
+		const view = getViewEdges(scroller);
+		await expect(row.top).toBeGreaterThanOrEqual(view.top);
+		await expect(row.bottom).toBeLessThanOrEqual(view.bottom);
+		await userEvent.tab({ shift: true });
+		await expect(canvas.getByRole("button", { name: "Row 89" })).toHaveFocus();
+	},
+};

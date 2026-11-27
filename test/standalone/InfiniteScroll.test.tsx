@@ -2364,6 +2364,249 @@ describe("InfiniteScroll behavior (stubbed layout)", () => {
 			});
 		});
 
+		describe("focus on the first row", () => {
+			interface RowsProps {
+				loadMoreTop?: () => void;
+				loadMoreBottom?: () => void;
+				loading?: boolean;
+				/** Rendered before the rows */
+				before?: React.ReactNode;
+				/** The number of rows, 20 by default */
+				count?: number;
+			}
+
+			/**
+			 * Content without focusable elements, then rows that are buttons, in a
+			 * list between two buttons. Focusing an element scrolls nothing in the
+			 * stubbed layout.
+			 */
+			const Rows = ({
+				loadMoreTop,
+				loadMoreBottom,
+				loading,
+				before,
+				count = 20,
+			}: RowsProps) => (
+				<>
+					<button type="button">Before the list</button>
+					<InfiniteScroll
+						className={SCROLLER}
+						loadMoreTop={loadMoreTop}
+						loadMoreBottom={loadMoreBottom}
+						loading={loading}
+					>
+						<div>Content without focusable elements</div>
+						{before}
+						{range(1, count).map((n) => (
+							<button key={n} type="button">
+								Row {n}
+							</button>
+						))}
+					</InfiniteScroll>
+					<button type="button">After the list</button>
+				</>
+			);
+
+			const focus = (element: HTMLElement) =>
+				act(() => {
+					element.focus();
+				});
+			const getRow = (n: number) =>
+				screen.getByRole("button", { name: `Row ${n}` });
+			const findScroller = (container: HTMLElement) => {
+				const scroller = container.querySelector<HTMLElement>(`.${SCROLLER}`);
+				if (!scroller) throw new Error("scroll container not found");
+				return scroller;
+			};
+
+			/**
+			 * Renders the list, lets it make the `loadMoreTop` call it makes once it
+			 * is filled at its top, then scrolls it 100px down, away from its top,
+			 * and forgets that call
+			 */
+			const renderAwayFromTop = (ui: React.ReactElement, top: Mock) => {
+				const result = render(ui);
+				advance(200);
+				expect(top).toHaveBeenCalledTimes(1);
+				scrollTo(findScroller(result.container), 100);
+				advance(200);
+				expect(top).toHaveBeenCalledTimes(1);
+				top.mockClear();
+				return result;
+			};
+
+			it("[ISSUE-3471-ITEM-14] calls loadMoreTop when focus moves to the first row away from the list's top, however much content without focusable elements precedes it", () => {
+				const top = vi.fn();
+				renderAwayFromTop(<Rows loadMoreTop={top} />, top);
+
+				focus(getRow(2));
+				advance(200);
+				expect(top).not.toHaveBeenCalled();
+				focus(getRow(1));
+				advance(99);
+				expect(top).not.toHaveBeenCalled();
+				advance(1);
+				expect(top).toHaveBeenCalledTimes(1);
+			});
+
+			it("[ISSUE-3471-ITEM-14] calls nothing when focus moves to a row that a tab stop precedes in the container", () => {
+				const top = vi.fn();
+				renderAwayFromTop(
+					<Rows
+						loadMoreTop={top}
+						before={<a href="#earlier">Show earlier rows</a>}
+					/>,
+					top,
+				);
+				focus(getRow(1));
+				advance(200);
+				expect(top).not.toHaveBeenCalled();
+
+				focus(screen.getByRole("link", { name: "Show earlier rows" }));
+				advance(200);
+				expect(top).toHaveBeenCalledTimes(1);
+			});
+
+			it("[ISSUE-3471-ITEM-14] counts a tab stop that contains the focused element, which Shift+Tab reaches next", () => {
+				const top = vi.fn();
+				renderAwayFromTop(
+					<InfiniteScroll className={SCROLLER} loadMoreTop={top}>
+						<div>Content without focusable elements</div>
+						<div role="group" aria-label="Week 1" tabIndex={0}>
+							<button type="button">Entry 1</button>
+						</div>
+					</InfiniteScroll>,
+					top,
+				);
+				focus(screen.getByRole("button", { name: "Entry 1" }));
+				advance(200);
+				expect(top).not.toHaveBeenCalled();
+
+				focus(screen.getByRole("group", { name: "Week 1" }));
+				advance(200);
+				expect(top).toHaveBeenCalledTimes(1);
+			});
+
+			it("[ISSUE-3471-ITEM-14] calls nothing when focus moves to the scroll container away from its top, also when its rows contain nothing focusable", () => {
+				const top = vi.fn();
+				const { container } = renderAwayFromTop(
+					<InfiniteScroll className={SCROLLER} loadMoreTop={top}>
+						<div>Row 1</div>
+						<div>Row 2</div>
+					</InfiniteScroll>,
+					top,
+				);
+				focus(findScroller(container));
+				advance(200);
+				expect(top).not.toHaveBeenCalled();
+			});
+
+			it("[ISSUE-3471-ITEM-14] does not count what Shift+Tab skips before the first row: disabled, hidden or inert controls, hidden inputs and elements with a negative tabIndex", () => {
+				const top = vi.fn();
+				renderAwayFromTop(
+					<Rows
+						loadMoreTop={top}
+						before={
+							<>
+								<button type="button" disabled>
+									Disabled
+								</button>
+								<fieldset disabled>
+									<input aria-label="In a disabled fieldset" />
+								</fieldset>
+								<div hidden>
+									<button type="button">Hidden</button>
+								</div>
+								<div inert>
+									<button type="button">Inert</button>
+								</div>
+								<input type="hidden" name="cursor" value="1" />
+								<div tabIndex={-1}>Focus target</div>
+							</>
+						}
+					/>,
+					top,
+				);
+				focus(getRow(1));
+				advance(200);
+				expect(top).toHaveBeenCalledTimes(1);
+			});
+
+			it("[ISSUE-3471-ITEM-14] in a widget that moves focus with the arrow keys, calls loadMoreTop for its first item only", () => {
+				const top = vi.fn();
+				renderAwayFromTop(
+					<InfiniteScroll className={SCROLLER} loadMoreTop={top}>
+						{/* same tag, but no option: not an item of the widget */}
+						<div tabIndex={-1}>Focus target</div>
+						<div role="listbox" aria-label="Rows">
+							{range(1, 20).map((n) => (
+								<div
+									key={n}
+									role="option"
+									aria-selected={false}
+									tabIndex={n === 20 ? 0 : -1}
+								>
+									Option {n}
+								</div>
+							))}
+						</div>
+					</InfiniteScroll>,
+					top,
+				);
+				const options = screen.getAllByRole("option");
+				// the last option is the widget's tab stop; the arrow keys move focus
+				// up from option to option, and the tab stop with it
+				const moveTo = (target: HTMLElement) => {
+					for (const option of options) {
+						option.tabIndex = option === target ? 0 : -1;
+					}
+					focus(target);
+					advance(200);
+				};
+				for (const option of options.slice(1).reverse()) moveTo(option);
+				expect(top).not.toHaveBeenCalled();
+				moveTo(options[0]);
+				expect(top).toHaveBeenCalledTimes(1);
+			});
+
+			it("[ISSUE-3471-ITEM-14] drops the call once focus left the first row before the wait is over", () => {
+				const top = vi.fn();
+				renderAwayFromTop(<Rows loadMoreTop={top} />, top);
+				focus(getRow(1));
+				advance(50);
+				focus(screen.getByRole("button", { name: "Before the list" }));
+				advance(200);
+				expect(top).not.toHaveBeenCalled();
+			});
+
+			it("[ISSUE-3471-ITEM-14] holds the call while loading, and makes it once loading ends with focus still on the first row", () => {
+				const top = vi.fn();
+				const { rerender } = renderAwayFromTop(<Rows loadMoreTop={top} />, top);
+				rerender(<Rows loadMoreTop={top} loading />);
+				focus(getRow(1));
+				advance(200);
+				expect(top).not.toHaveBeenCalled();
+
+				rerender(<Rows loadMoreTop={top} loading={false} />);
+				advance(200);
+				expect(top).toHaveBeenCalledTimes(1);
+			});
+
+			it("[ISSUE-3471-ITEM-14] calls loadMoreTop and loadMoreBottom when focus moves to the only row", () => {
+				const top = vi.fn();
+				const bottom = vi.fn();
+				renderAwayFromTop(
+					<Rows loadMoreTop={top} loadMoreBottom={bottom} count={1} />,
+					top,
+				);
+				expect(bottom).not.toHaveBeenCalled();
+				focus(getRow(1));
+				advance(200);
+				expect(top).toHaveBeenCalledTimes(1);
+				expect(bottom).toHaveBeenCalledTimes(1);
+			});
+		});
+
 		describe("triggers that keep coming while a call waits", () => {
 			/**
 			 * Scrolls the container from `from` to `to` by `step` px every 50ms, as

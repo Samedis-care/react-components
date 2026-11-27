@@ -386,6 +386,19 @@ export const Issue3478Item16FailedWeekCanBeRetried: ScrollableStory = {
 		await expect(retry).toHaveAccessibleDescription(
 			`Week ${weekNo} could not be loaded Request failed with status code 500`,
 		);
+		// the week above has loaded, as by the time a user gets to Retry: Retry is
+		// not the list's first focusable element, whose focus loads the week above
+		const scroller = canvasElement.querySelector<HTMLElement>(
+			".failing-week-wrapper",
+		);
+		if (!scroller) throw new Error("no scroll container");
+		await waitFor(
+			() => expect(within(scroller).getAllByRole("button")[0]).not.toBe(retry),
+			{ timeout: 3000 },
+		);
+		await waitFor(() =>
+			expect(within(scroller).queryByRole("progressbar")).toBeNull(),
+		);
 		retry.focus();
 		await waitFor(() => expect(retry).toHaveClass("Mui-focusVisible"));
 		await expect(outlineOf(retry), "Retry shows no focus ring").not.toBeNull();
