@@ -6,7 +6,16 @@ import {
 	People as PeopleIcon,
 	Settings as SettingsIcon,
 } from "@mui/icons-material";
-import { Box, Button, List, Paper, Typography } from "@mui/material";
+import {
+	Box,
+	Button,
+	createTheme,
+	List,
+	Paper,
+	Theme,
+	ThemeProvider,
+	Typography,
+} from "@mui/material";
 // eslint-disable-next-line import/no-unresolved
 import { expect, userEvent, waitFor, within } from "storybook/test";
 import PortalLayout, { PortalLayoutContext, PortalLayoutProps } from "./Layout";
@@ -961,6 +970,109 @@ export const Issue3479Item11CloseButtonOverTopLeft: LayoutStory = {
 			() => home().parentElement!,
 			home,
 		);
+	},
+};
+
+export const Issue3479Item16BurgerContrast: LayoutStory = {
+	args: { collapseMenu: true },
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3479-ITEM-16: the burger icon takes the AppBar's text color, as in MUI's AppBar examples (4.6:1 here), not IconButton's default action color (54% black, 2.65:1 on `primary.main`), so it reaches the 3:1 non-text contrast minimum.",
+			},
+		},
+	},
+	render: (args) => (
+		<div style={fullHeight}>
+			<PortalLayout
+				{...args}
+				variant="no-top-left"
+				headerContent={pageTitle()}
+				menuContent={menu()}
+				content={<div style={{ padding: 24 }}>Content</div>}
+			/>
+		</div>
+	),
+	play: async ({ canvas }) => {
+		const burger = canvas.getByRole("button", { name: "Toggle menu" });
+		const icon = burger.querySelector("svg")!;
+		const appBar = burger.closest("header")!;
+		const ratio = contrast(
+			getComputedStyle(icon).color,
+			getComputedStyle(appBar).backgroundColor,
+		);
+		await expect(ratio).toBeGreaterThanOrEqual(3);
+	},
+};
+
+/** PortalLayout in mobile view, in its own theme */
+const LayoutInTheme = ({ theme }: { theme: Theme }) => (
+	<ThemeProvider theme={theme}>
+		<div style={fullHeight}>
+			<PortalLayout
+				variant="no-top-left"
+				collapseMenu
+				headerContent={pageTitle()}
+				menuContent={menu()}
+				content={<div style={{ padding: 24 }}>Content</div>}
+			/>
+		</div>
+	</ThemeProvider>
+);
+
+const expectBurgerInAppBarTextColor = async (canvasElement: HTMLElement) => {
+	const burger = within(canvasElement).getByRole("button", {
+		name: "Toggle menu",
+	});
+	const iconColor = getComputedStyle(burger.querySelector("svg")!).color;
+	const appBar = getComputedStyle(burger.closest("header")!);
+	await expect(iconColor).toBe(appBar.color);
+	await expect(
+		contrast(iconColor, appBar.backgroundColor),
+	).toBeGreaterThanOrEqual(3);
+};
+
+const iconButtonPrimaryTheme = createTheme({
+	palette: { primary: { main: "#425159" } },
+	components: { MuiIconButton: { defaultProps: { color: "primary" } } },
+});
+
+export const Issue3479Item16BurgerIgnoresThemeIconButtonColor: Story = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3479-ITEM-16: the theme's IconButtons default to `color: \"primary\"`. The burger keeps the AppBar's text color; in the primary color it would vanish in the AppBar (1:1).",
+			},
+		},
+	},
+	render: () => <LayoutInTheme theme={iconButtonPrimaryTheme} />,
+	play: async ({ canvasElement }) => {
+		await expectBurgerInAppBarTextColor(canvasElement);
+	},
+};
+
+const coloredDarkAppBarTheme = createTheme({
+	palette: { mode: "dark" },
+	components: { MuiAppBar: { defaultProps: { enableColorOnDark: true } } },
+});
+
+export const Issue3479Item16BurgerOnColoredDarkAppBar: Story = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3479-ITEM-16: MUI's dark palette with an AppBar in `primary.main` (`enableColorOnDark`). The burger has the AppBar's dark text color; the palette's white action color would have 1.75:1 on the light blue.",
+			},
+		},
+	},
+	render: () => <LayoutInTheme theme={coloredDarkAppBarTheme} />,
+	play: async ({ canvasElement }) => {
+		await expectBurgerInAppBarTextColor(canvasElement);
 	},
 };
 

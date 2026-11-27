@@ -22,7 +22,9 @@ export interface PortalLayoutHeaderProps {
 	 *
 	 * true renders the burger button, which tells assistive technology whether
 	 * the drawer is open (`aria-expanded`, from the layout's `menuOpen`) and
-	 * which element the drawer is (`aria-controls`, `drawerId`).
+	 * which element the drawer is (`aria-controls`, `drawerId`). Its icon has
+	 * the AppBar's text color (`color="inherit"`), whatever color the theme
+	 * gives IconButtons.
 	 */
 	mobile: boolean;
 	/**
@@ -62,6 +64,10 @@ const PortalLayoutHeader = (props: PortalLayoutHeaderProps) => {
 			<Toolbar classes={customClasses?.toolbar}>
 				{mobile && (
 					<MenuButton
+						// the AppBar's text color, as in MUI's AppBar examples: IconButton's
+						// action color or a theme's default IconButton color can fall below
+						// 3:1 on the AppBar's background
+						color="inherit"
 						onClick={toggleMenu}
 						size="large"
 						aria-label={t("standalone.portal.menu-toggle")}
