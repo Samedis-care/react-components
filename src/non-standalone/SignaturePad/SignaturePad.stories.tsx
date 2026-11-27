@@ -112,6 +112,21 @@ const meta: Meta<typeof PadHost> = {
 			description:
 				'When set, the tile shows an info button ("More information") that calls it.',
 		},
+		className: {
+			control: "text",
+			description:
+				"A CSS class for the tile's root. It does not reach the dialog, which a theme's `components.CcSignPadDialog` styles.",
+		},
+		classes: {
+			control: "object",
+			description:
+				"CSS classes for the tile's slots (`root`, `button`, `signTextDiv`, `imageDiv`, `signPreview`, `infoDiv`). They do not reach the dialog.",
+		},
+		canvasProps: {
+			control: "object",
+			description:
+				'Props for the dialog\'s drawing canvas, spread over its own (`role="img"`, named "Signature area"): e.g. an `aria-label` of your own. No `width` and `height`: the canvas fills the sign area.',
+		},
 	},
 };
 
@@ -368,6 +383,43 @@ export const Issue3467Item18OpenDrawingDialogPassesAxe: Story = {
 		tileIn(canvasElement).click();
 		await expect(await signCanvas()).toHaveAttribute("role", "img");
 		// axe runs after the play, with the dialog open
+	},
+};
+
+export const Issue3467Item11CanvasPropsReachTheCanvas: Story = {
+	args: {
+		className: "custom-tile",
+		canvasProps: {
+			"aria-label": "Draw your signature",
+			className: "custom-canvas",
+		},
+	},
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3467-ITEM-11: `className` styles the tile, and `canvasProps` reach the drawing canvas of the dialog, here a name of their own and a class. The canvas stays an image, and its bitmap still follows the sign area.",
+			},
+		},
+		a11y: { test: "error" },
+	},
+	play: async ({ canvasElement }) => {
+		const tile = tileIn(canvasElement);
+		await expect(tile).toHaveClass("custom-tile");
+		tile.click();
+		const c = await signCanvas();
+		await expect(page().getByRole("img", { name: "Draw your signature" })).toBe(
+			c,
+		);
+		await expect(c).toHaveClass("custom-canvas");
+		await expect(document.querySelector(".MuiDialog-root")).not.toHaveClass(
+			"custom-tile",
+		);
+		await waitFor(async () => {
+			const [bitmap, box] = bitmapMatchesBox(c);
+			await expect(bitmap, "the canvas bitmap follows its box").toEqual(box);
+		});
+		await closeDialog();
 	},
 };
 

@@ -25,7 +25,7 @@ import DialogContextProvider, {
 	useDialogContext,
 } from "../../src/framework/DialogContextProvider";
 import ccI18n from "../../src/i18n";
-import { createTheme, ThemeProvider } from "@mui/material";
+import { createTheme, Theme, ThemeProvider } from "@mui/material";
 
 import SignaturePad from "../../src/non-standalone/SignaturePad/SignaturePad";
 import {
@@ -190,6 +190,103 @@ describe("SignaturePad", () => {
 		fireEvent.click(activator);
 		expect(dialog()).toBeInTheDocument();
 	});
+
+	it("[ISSUE-3467-ITEM-11] className and classes given to SignaturePad style the tile, not the dialog", () => {
+		withDialogs(
+			<SignaturePad
+				signature=""
+				className="pad-cls"
+				classes={{ root: "pad-root" }}
+			/>,
+		);
+		expect(
+			tile(),
+			"the tile root lacks className and classes.root",
+		).toHaveClass("pad-cls", "pad-root");
+		openPad();
+		const dialogRoot = document.querySelector(".MuiDialog-root");
+		expect(dialogRoot).not.toHaveClass("pad-cls");
+		expect(dialogRoot).not.toHaveClass("pad-root");
+	});
+
+	it("[ISSUE-3467-ITEM-11] canvasProps given to SignaturePad reach the canvas", () => {
+		withDialogs(
+			<SignaturePad
+				signature=""
+				canvasProps={{ "aria-label": "Draw your signature" }}
+			/>,
+		);
+		openPad();
+		expect(canvasIn(dialog())).toHaveAttribute(
+			"aria-label",
+			"Draw your signature",
+		);
+	});
+
+	it("[ISSUE-3467-ITEM-11] classes.imageDiv given to SignaturePad styles the tile's image box, not the dialog's of the same slot name", () => {
+		withDialogs(
+			<SignaturePad signature={SIG} classes={{ imageDiv: "pad-img" }} />,
+		);
+		const tileImage = tile().querySelector("img");
+		expect(tileImage?.parentElement).toHaveClass("pad-img");
+		openPad();
+		const stored = within(dialog()).getByRole("img", { name: "Signature" });
+		expect(stored.parentElement).not.toHaveClass("pad-img");
+	});
+
+	it("[ISSUE-3467-ITEM-11] canvasProps given to a pushed SignDialog reach the canvas, which keeps its role and name unless they set their own", () => {
+		withDialogs(
+			<Opener signature="" canvasProps={{ className: "my-canvas" }} />,
+		);
+		fireEvent.click(screen.getByText("open"));
+		const canvas = canvasIn(dialog());
+		expect(canvas).toHaveClass("my-canvas");
+		expect(within(dialog()).getByRole("img", { name: "Signature area" })).toBe(
+			canvas,
+		);
+	});
+
+	it("[ISSUE-3467-ITEM-11] SignaturePad's type takes neither openSignPad nor clearOnResize, and a tile click opens its own dialog", () => {
+		const open = vi.fn();
+		const props: React.ComponentProps<typeof SignaturePad> = {
+			signature: "",
+			// @ts-expect-error SignaturePad opens its own dialog
+			openSignPad: open,
+		};
+		const resize: React.ComponentProps<typeof SignaturePad> = {
+			signature: "",
+			// @ts-expect-error the ink survives a resize, nothing to configure
+			clearOnResize: true,
+		};
+		withDialogs(<SignaturePad {...resize} {...props} />);
+		openPad();
+		expect(dialog()).toBeInTheDocument();
+		expect(open).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3467-ITEM-11] a class for the dialog goes through the CcSignPadDialog default props of a theme around the field", () => {
+		const withSignDialogClass = (outer: Theme): Theme => ({
+			...outer,
+			components: {
+				...outer.components,
+				CcSignPadDialog: { defaultProps: { className: "my-sign-dialog" } },
+			},
+		});
+		// an app's theme, as the Framework provides it
+		withDialogs(
+			<ThemeProvider theme={createTheme()}>
+				<ThemeProvider theme={withSignDialogClass}>
+					<SignaturePad signature="" className="pad-cls" />
+				</ThemeProvider>
+			</ThemeProvider>,
+		);
+		expect(tile()).not.toHaveClass("my-sign-dialog");
+		openPad();
+		const dialogRoot = document.querySelector(".MuiDialog-root");
+		expect(dialogRoot).toHaveClass("my-sign-dialog");
+		expect(dialogRoot).not.toHaveClass("pad-cls");
+	});
+
 	it("[ISSUE-3467-ITEM-10] the open dialog follows a signer name that arrives after it opened", () => {
 		const Host = () => {
 			const [name, setName] = useState<string | null>(null);

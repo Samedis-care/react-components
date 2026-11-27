@@ -36,7 +36,26 @@ export interface SignPadDialogProps extends IDialogConfigSign {
 	 * Custom styles
 	 */
 	classes?: Partial<Record<SignPadDialogClassKey, string>>;
+	/**
+	 * Props for the `<canvas>` the signature is drawn on, e.g. an `aria-label`
+	 * of your own or a `className`. They are spread over the canvas's own,
+	 * `role="img"` and the name "Signature area"
+	 * (`standalone.signature-pad.dialog.sign-area`), so an `aria-label` here
+	 * replaces that name. No `width` and `height`: the canvas fills the sign
+	 * area. The canvas exists only while the dialog shows no stored signature
+	 * (an unsigned field, or after Clear). Default: none.
+	 */
+	canvasProps?: Omit<
+		React.CanvasHTMLAttributes<HTMLCanvasElement>,
+		"width" | "height"
+	>;
 }
+
+// react-signature-pad-wrapper spreads its canvasProps onto the <canvas> as
+// React props, but types them as strings only
+type WrapperCanvasProps = React.ComponentProps<
+	typeof SignaturePad
+>["canvasProps"];
 
 const RootDialog = styled(Dialog, { name: "CcSignPadDialog", slot: "root" })(
 	{},
@@ -150,6 +169,7 @@ const SignPadDialog = (inProps: SignPadDialogProps) => {
 		className,
 		name,
 		onBlur,
+		canvasProps: canvasPropsProp,
 	} = props;
 	const signerName = signerNameUntrim?.trim();
 	const [resetCanvas, setResetCanvas] = useState(!!signature);
@@ -161,14 +181,16 @@ const SignPadDialog = (inProps: SignPadDialogProps) => {
 	const signCanvas = useRef<SignaturePad>(null);
 	const instructionsId = useId();
 	// the canvas is drawn on with a pointer only, not operated by keyboard: an image
-	// with a name, so screen readers find it, also when exploring by touch
-	const canvasProps = useMemo(
-		() => ({
+	// with a name, so screen readers find it, also when exploring by touch. The
+	// caller's canvasProps go over these
+	const canvasProps = useMemo(() => {
+		const merged: React.CanvasHTMLAttributes<HTMLCanvasElement> = {
 			role: "img",
 			"aria-label": t("standalone.signature-pad.dialog.sign-area"),
-		}),
-		[t],
-	);
+			...canvasPropsProp,
+		};
+		return merged as unknown as WrapperCanvasProps;
+	}, [t, canvasPropsProp]);
 	const hiddenRef = useRef<HTMLInputElement>(null);
 	const clearCanvas = useCallback(async () => {
 		if (

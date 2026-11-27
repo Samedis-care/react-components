@@ -5,21 +5,29 @@ import {
 	PushedDialogClose,
 	PushedDialogCloseContext,
 } from "../../framework/PushedDialogCloseContext";
-import { SignDialog } from "../Dialog/SignPadDialog";
+import { SignDialog, SignPadDialogProps } from "../Dialog/SignPadDialog";
 
-export interface SignaturePadCanvasProps extends SignPadProps {
+/**
+ * Props of SignaturePad. The tile (SignPad) gets `signature`, `signerName`,
+ * `disabled`, `openInfo`, `className`, `classes`, `id`, the ARIA props and
+ * `required`; the dialog (SignDialog) gets `signature`, `signerName`, `name`,
+ * `penColor`, `setSignature`, `onBlur` and `canvasProps`. SignPad's
+ * `openSignPad` is not one of them: the field opens its own dialog.
+ */
+export interface SignaturePadCanvasProps extends Omit<
+	SignPadProps,
+	"openSignPad"
+> {
 	/**
 	 * The name of the input
 	 */
 	name?: string;
 	/**
-	 * The props used to draw HTML canvas
+	 * Props for the dialog's drawing canvas, as SignDialog's `canvasProps`:
+	 * e.g. an `aria-label` of your own, which replaces the canvas's name
+	 * "Signature area". Default: none.
 	 */
-	canvasProps?: React.CanvasHTMLAttributes<HTMLCanvasElement>;
-	/**
-	 * Boolean flag to clear signature
-	 */
-	clearOnResize?: boolean;
+	canvasProps?: SignPadDialogProps["canvasProps"];
 	/**
 	 * Use to change signature pen color
 	 */
@@ -30,6 +38,18 @@ export interface SignaturePadCanvasProps extends SignPadProps {
 	 * click that opened it.
 	 */
 	setSignature?: (imageURL: string) => void;
+	/**
+	 * A CSS class for the tile's root, as SignPad's `className`. It does not
+	 * reach the dialog: style that with `components.CcSignPadDialog` of a theme
+	 * around the field.
+	 */
+	className?: string;
+	/**
+	 * CSS classes for the tile's slots, as SignPad's `classes`. They do not
+	 * reach the dialog, whose slots have their own names (CcSignPadDialog):
+	 * style them with `components.CcSignPadDialog` of a theme around the field.
+	 */
+	classes?: SignPadProps["classes"];
 }
 
 /**
@@ -41,23 +61,29 @@ export interface SignaturePadCanvasProps extends SignPadProps {
  * closes, unsaved, when the field unmounts or becomes `disabled`. Escape,
  * the close button and Save close it too, and focus returns to the tile. The
  * dialog and its Clear confirmation render from the field itself, so no
- * DialogContextProvider is needed above it.
+ * DialogContextProvider is needed above it. `className` and `classes` style
+ * the tile; a theme's `components.CcSignPadDialog` styles the dialog.
  */
-const SignaturePadCanvas = (
-	props: SignaturePadCanvasProps &
-		Omit<SignPadProps, "classes" | "openSignPad">,
-) => {
+const SignaturePadCanvas = (props: SignaturePadCanvasProps) => {
 	const {
 		signature,
+		signerName,
 		disabled,
 		openInfo,
+		className,
+		classes,
 		// the field's id, label, description and states go to the tile's button
 		id,
 		"aria-labelledby": ariaLabelledBy,
 		"aria-describedby": ariaDescribedBy,
 		"aria-invalid": ariaInvalid,
 		required,
-		...dialogProps
+		// the dialog's
+		name,
+		penColor,
+		setSignature,
+		onBlur,
+		canvasProps,
 	} = props;
 	const [open, setOpen] = useState(false);
 	// a field disabled while its dialog is open (the form turned read-only)
@@ -77,9 +103,11 @@ const SignaturePadCanvas = (
 			<SignPad
 				openSignPad={showSignDialog}
 				signature={signature}
-				signerName={dialogProps.signerName}
+				signerName={signerName}
 				disabled={disabled}
 				openInfo={openInfo}
+				className={className}
+				classes={classes}
 				id={id}
 				aria-labelledby={ariaLabelledBy}
 				aria-describedby={ariaDescribedBy}
@@ -95,7 +123,15 @@ const SignaturePadCanvas = (
 				<DialogContextProvider>
 					<PushedDialogCloseContext.Provider value={dialogClose}>
 						<Suspense>
-							<SignDialog signature={signature} {...dialogProps} />
+							<SignDialog
+								signature={signature}
+								signerName={signerName}
+								name={name}
+								penColor={penColor}
+								setSignature={setSignature}
+								onBlur={onBlur}
+								canvasProps={canvasProps}
+							/>
 						</Suspense>
 					</PushedDialogCloseContext.Provider>
 				</DialogContextProvider>
