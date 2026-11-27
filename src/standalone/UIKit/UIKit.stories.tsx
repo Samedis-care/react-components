@@ -949,19 +949,28 @@ export const Issue3482Item23SubActionButtonColorStates: ActionButtonStory = {
 				icon: getComputedStyle(icon).fill,
 			};
 		};
-		await expect(colors("Home"), "the colors without color").toEqual({
-			label: computed(palette.text.primary),
-			icon: computed(palette.primary.main),
-		});
-		await expect(colors("Retire"), "the colors while disabled").toEqual({
-			label: computed(palette.text.disabled),
-			icon: computed(palette.text.disabled),
-		});
+		// the colors settle after the first render's color transitions (MUI's
+		// button transitions its color), so they are read once they reach the
+		// expected value instead of at once
+		await waitFor(() =>
+			expect(colors("Home"), "the colors without color").toEqual({
+				label: computed(palette.text.primary),
+				icon: computed(palette.primary.main),
+			}),
+		);
+		await waitFor(() =>
+			expect(colors("Retire"), "the colors while disabled").toEqual({
+				label: computed(palette.text.disabled),
+				icon: computed(palette.text.disabled),
+			}),
+		);
 		const secondary = computed(palette.secondary.main);
-		await expect(colors("Save"), "the theme's default color").toEqual({
-			label: secondary,
-			icon: secondary,
-		});
+		await waitFor(() =>
+			expect(colors("Save"), "the theme's default color").toEqual({
+				label: secondary,
+				icon: secondary,
+			}),
+		);
 		const del = canvas.getByRole("button", { name: "Delete" });
 		const unhover = forceHover(del);
 		try {
