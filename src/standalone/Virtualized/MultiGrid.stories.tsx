@@ -1,11 +1,17 @@
 /* eslint-disable react/no-children-prop */
-import React from "react";
+import React, { useCallback, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
 import { expect, userEvent, waitFor, within } from "storybook/test";
 import { Box, Dialog, DialogContent } from "@mui/material";
 import MultiGrid, { MultiGridProps } from "./MultiGrid";
 import type { CellComponentProps } from "react-window";
+import { DataGrid, DataGridNoPersist } from "../DataGrid";
+import type {
+	DataGridData,
+	IDataGridColumnDef,
+	IDataGridLoadDataParameters,
+} from "../DataGrid/DataGrid";
 
 // ─── Meta ─────────────────────────────────────────────────────────────────────
 
@@ -593,5 +599,113 @@ export const Issue3472Item11RowsHaveCells: StoryObj<typeof MultiGrid> = {
 				);
 			}
 		}
+	},
+};
+
+const PAGE_TEST_COLUMNS: IDataGridColumnDef[] = [
+	{ field: "name", headerName: "Name", type: "string" },
+];
+
+/**
+ * A DataGrid (MultiGrid's consumer) over `rowsTotal` rows, `rowsPerPage` rows
+ * per page (default: DataGrid's 25) and `height` px tall (default: tall enough
+ * to show 25 rows). The pages it requested are listed in a test id, in request
+ * order.
+ */
+const DataGridPageRequests = ({
+	rowsTotal,
+	rowsPerPage,
+	height = 1800,
+}: {
+	rowsTotal: number;
+	rowsPerPage?: number;
+	height?: number;
+}) => {
+	const [requested, setRequested] = useState<number[]>([]);
+	const loadData = useCallback(
+		({ page, rows }: IDataGridLoadDataParameters): Promise<DataGridData> => {
+			setRequested((prev) => [...prev, page]);
+			const first = (page - 1) * rows;
+			const count = Math.max(0, Math.min(rows, rowsTotal - first));
+			return Promise.resolve({
+				rowsTotal,
+				rowsFiltered: rowsTotal,
+				rows: Array.from({ length: count }, (_, i) => ({
+					id: String(first + i + 1),
+					name: `Person ${first + i + 1}`,
+				})),
+			});
+		},
+		[rowsTotal],
+	);
+	return (
+		<Box>
+			<div data-testid={"requested-pages"}>{requested.join(",")}</div>
+			<Box sx={{ width: 600, height }}>
+				<DataGridNoPersist>
+					<DataGrid
+						columns={PAGE_TEST_COLUMNS}
+						loadData={loadData}
+						rowsPerPage={rowsPerPage}
+					/>
+				</DataGridNoPersist>
+			</Box>
+		</Box>
+	);
+};
+
+export const Issue3472Item7DataGridRequestsNoPagePastTheEnd: StoryObj<
+	typeof MultiGrid
+> = {
+	render: () => <DataGridPageRequests rowsTotal={25} />,
+	parameters: {
+		// DataGrid's own axe findings are not this story's subject
+		a11y: { test: "off" },
+		docs: {
+			description: {
+				story:
+					"A DataGrid with exactly 25 rows (one page) shows all of them. MultiGrid reports the last visible row as grid row 25 (the header is row 0); DataGrid turns it into data row 24 before it divides by its 25 rows per page, so it requests page 1 only, not page 2, which lies past the end.",
+			},
+		},
+	},
+	play: async ({ canvas }) => {
+		await canvas.findByText("Person 25");
+		// give DataGrid time for the requests that follow the first page
+		await new Promise((resolve) => setTimeout(resolve, 500));
+		await expect(canvas.getByTestId("requested-pages")).toHaveTextContent(
+			/^1$/,
+		);
+	},
+};
+
+export const Issue3472Item7DataGridLoadsTheFirstVisibleRow: StoryObj<
+	typeof MultiGrid
+> = {
+	render: () => (
+		<DataGridPageRequests rowsTotal={100} rowsPerPage={10} height={500} />
+	),
+	parameters: {
+		// DataGrid's own axe findings are not this story's subject
+		a11y: { test: "off" },
+		docs: {
+			description: {
+				story:
+					"A DataGrid of 100 rows, 10 per page, that shows fewer than 10 rows at a time, so it loads page 1 only. A jump (a scrollbar drag, End, a restored scroll position) makes grid row 20 the first visible row: data row 19, the last row of page 2. DataGrid requests pages 2 and 3, so the top row shows its record instead of staying a skeleton.",
+			},
+		},
+	},
+	play: async ({ canvas }) => {
+		await canvas.findByText("Person 1");
+		// precondition: the rows it shows lie on page 1
+		await expect(canvas.getByTestId("requested-pages")).toHaveTextContent(
+			/^1$/,
+		);
+
+		const pane = canvas.getByRole("grid", { name: "Table contents" });
+		// grid row 20 at the top: the header is row 0 and not part of this pane
+		pane.scrollTop = 19 * 57;
+		// page 3 starts with the second visible row
+		await canvas.findByText("Person 21");
+		await expect(canvas.getByText("Person 20")).toBeVisible();
 	},
 };
