@@ -237,6 +237,22 @@ describe("date pickers in the DataGrid column filter", () => {
 		});
 	});
 
+	it.each(["date", "datetime"] as const)(
+		"[ISSUE-3474-ITEM-25] fills the popup's width with both pickers of a %s range, as a picker at its own width grows to fit its date",
+		(valueType) => {
+			renderFilter(valueType, {
+				type: "inRange",
+				value1: "2026-08-01T12:00:00.000Z",
+				value2: "2026-08-31T12:00:00.000Z",
+			});
+			for (const name of ["From", "To"]) {
+				expect(
+					screen.getByRole("group", { name }).closest(".MuiFormControl-root"),
+				).toHaveClass("MuiFormControl-fullWidth");
+			}
+		},
+	);
+
 	it("[ISSUE-3474-ITEM-12] keeps the filter and its chained filter while a day is retyped, and applies the new day when focus leaves", () => {
 		const nextFilter: IFilterDef = {
 			type: "equals",

@@ -13,6 +13,7 @@ import {
 	yearCalendarClasses,
 } from "@mui/x-date-pickers";
 import focusRing from "../../utils/internal/focusRing";
+import prependSx from "../../utils/internal/prependSx";
 
 /**
  * The keyboard focus ring of every control in a picker's calendar: a 2px
@@ -65,17 +66,6 @@ interface LayoutSlotProps {
 	layout?: { sx?: SxProps<Theme> };
 }
 
-/** One entry of an `sx` array */
-type SxEntry = Exclude<SxProps<Theme>, ReadonlyArray<unknown>> | boolean;
-
-/**
- * Whether an `sx` is an array of styles
- * @param sx The `sx`
- * @returns true for an array
- */
-const isSxArray = (sx: SxProps<Theme>): sx is readonly SxEntry[] =>
-	Array.isArray(sx);
-
 /**
  * Shows the keyboard focus in a picker's open calendar, the desktop popup and
  * the mobile dialog alike, by a focus ring (see {@link calendarFocusRing}).
@@ -93,14 +83,10 @@ const isSxArray = (sx: SxProps<Theme>): sx is readonly SxEntry[] =>
 const calendarFocusRingSlotProps = (
 	slotProps: LayoutSlotProps | undefined,
 ): LayoutSlotProps => {
-	const sx = slotProps?.layout?.sx;
 	return {
 		layout: {
 			...slotProps?.layout,
-			sx: [
-				calendarFocusRing,
-				...(sx === undefined ? [] : isSxArray(sx) ? sx : [sx]),
-			],
+			sx: prependSx(calendarFocusRing, slotProps?.layout?.sx),
 		},
 	};
 };

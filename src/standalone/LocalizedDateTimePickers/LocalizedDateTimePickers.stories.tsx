@@ -867,3 +867,133 @@ export const Issue3474Item21PickerNamedByAriaLabel: StoryObj = {
 		await expect(dialog).toHaveAccessibleName("Due date");
 	},
 };
+
+export const Issue3474Item25TextSpacingKeepsAllSections: StoryObj = {
+	name: "ISSUE-3474-ITEM-25: user text spacing does not clip the time",
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3474-ITEM-25: with the WCAG 1.4.12 text spacing (letter spacing 0.12em, word spacing 0.16em, line height 1.5) the sections of a DateTimePicker need about 200px. At its own width (without `fullWidth`) the field grows to fit them, where MUI keeps 182px and the AM/PM section disappears behind the calendar button.",
+			},
+		},
+	},
+	render: () => (
+		<div className="text-spacing">
+			<style>
+				{
+					".text-spacing * { letter-spacing: 0.12em !important; word-spacing: 0.16em !important; line-height: 1.5 !important; }"
+				}
+			</style>
+			<LocalizedDateTimePicker
+				label="Date & time"
+				value={moment("2026-08-01T10:30")}
+				onChange={() => {}}
+			/>
+		</div>
+	),
+	play: async ({ canvasElement }) => {
+		const sections = canvasElement.querySelector(
+			".MuiPickersSectionList-root",
+		)!;
+		await expect(sections.scrollWidth).toBeLessThanOrEqual(
+			sections.clientWidth,
+		);
+	},
+};
+
+/** Whether an element's content runs past its edge, which hides the rest */
+const isClipped = (element: Element) =>
+	element.scrollWidth > element.clientWidth;
+
+export const Issue3474Item25LongFormatKeepsAllSections: StoryObj = {
+	name: "ISSUE-3474-ITEM-25: a long format widens a picker at its own width",
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3474-ITEM-25: a picker without `fullWidth` is as wide as its sections, at least MUI's 182px: a long `format` widens the field instead of being cut off at the calendar button, while a date that fits keeps the 182px. An `sx` the caller passes to the field's input root (`slotProps.textField.slotProps.input.sx`) still applies, here the italic.",
+			},
+		},
+	},
+	render: () => (
+		<div>
+			<LocalizedDatePicker
+				label="Date picker"
+				value={moment("2026-08-01")}
+				onChange={() => {}}
+				format="dddd, MMMM D, YYYY"
+			/>
+			<LocalizedKeyboardDatePicker
+				label="Keyboard date picker"
+				value={moment("2026-08-01")}
+				onChange={() => {}}
+				format="dddd, MMMM D, YYYY"
+				slotProps={{
+					textField: {
+						slotProps: { input: { sx: { fontStyle: "italic" } } },
+					},
+				}}
+			/>
+			<LocalizedKeyboardDatePicker
+				label="Short date"
+				value={moment("2026-08-01")}
+				onChange={() => {}}
+			/>
+		</div>
+	),
+	play: async ({ canvasElement }) => {
+		const sections = [
+			...canvasElement.querySelectorAll(".MuiPickersSectionList-root"),
+		];
+		await expect(sections).toHaveLength(3);
+		await expect({
+			clipped: sections.map(isClipped),
+			shortDateWidth: sections[2].clientWidth,
+			callerStyle: getComputedStyle(sections[1].parentElement!).fontStyle,
+		}).toEqual({
+			clipped: [false, false, false],
+			shortDateWidth: 182,
+			callerStyle: "italic",
+		});
+	},
+};
+
+export const Issue3474Item25FullWidthKeepsTheContainerWidth: StoryObj = {
+	name: "ISSUE-3474-ITEM-25: a fullWidth picker stays as wide as its container",
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3474-ITEM-25: with `fullWidth` the field takes the width of its container, as in MUI, also where its sections would need more: the calendar button stays inside the field, and the container decides the room the sections get.",
+			},
+		},
+	},
+	render: () => (
+		<div className="text-spacing" style={{ width: 240 }}>
+			<style>
+				{
+					".text-spacing * { letter-spacing: 0.12em !important; word-spacing: 0.16em !important; line-height: 1.5 !important; }"
+				}
+			</style>
+			<LocalizedDateTimePicker
+				label="Date & time"
+				value={moment("2026-08-01T10:30")}
+				onChange={() => {}}
+				fullWidth
+			/>
+		</div>
+	),
+	play: async ({ canvas, canvasElement }) => {
+		const field = canvasElement.querySelector(".MuiPickersInputBase-root")!;
+		const fieldBox = field.getBoundingClientRect();
+		const buttonBox = openButton(canvas).getBoundingClientRect();
+		await expect({
+			fieldWidth: fieldBox.width,
+			buttonInsideField: buttonBox.right <= fieldBox.right,
+		}).toEqual({ fieldWidth: 240, buttonInsideField: true });
+	},
+};

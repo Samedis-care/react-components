@@ -594,12 +594,14 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 									aria-label={t("standalone.data-grid.content.filter-value.to")}
 									value={dateFilterValue(filterValue2)}
 									onChange={onFilterValue2ChangeDate}
+									fullWidth
 								/>
 							) : props.valueType === "datetime" ? (
 								<LocalizedDateTimePicker
 									aria-label={t("standalone.data-grid.content.filter-value.to")}
 									value={filterValue2 === "" ? null : moment(filterValue2)}
 									onChange={onFilterValue2ChangeDateTime}
+									fullWidth
 								/>
 							) : (
 								<TextField

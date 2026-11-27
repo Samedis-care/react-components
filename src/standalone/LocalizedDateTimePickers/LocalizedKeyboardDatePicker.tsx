@@ -21,6 +21,7 @@ import withAccessibleError from "./withAccessibleError";
 import withRequiredSections from "./withRequiredSections";
 import useFieldBlur from "./useFieldBlur";
 import withFieldName from "./withFieldName";
+import withFittingSections from "./withFittingSections";
 import withReportWhenDone from "./withReportWhenDone";
 import calendarNameSlotProps from "./calendarNameSlotProps";
 import calendarFocusRingSlotProps from "./calendarFocusRingSlotProps";
@@ -53,6 +54,12 @@ import OpenPickerButton from "./OpenPickerButton";
  * the default `slots.openPickerButton`, which a caller's own button replaces,
  * and goes into `slotProps.layout.sx`, which keeps a caller's layout slot
  * props and puts a caller's `sx` after it.
+ *
+ * Without `fullWidth` the field is as wide as its sections need, at least
+ * MUI's 182px: where the date needs more (a long `format`, or the user's
+ * text spacing, WCAG 1.4.12), the field grows rather than cutting off its
+ * end behind the calendar button. With `fullWidth` it takes the width of its
+ * container, as in MUI (see `withFittingSections`).
  *
  * Every date the picker takes or reports is a `Moment`, or `null` for no
  * date: `value`, `defaultValue`, `referenceDate`, `minDate`, `maxDate`, and
@@ -107,7 +114,10 @@ export interface LocalizedKeyboardDatePickerProps
 	 */
 	error?: TextFieldProps["error"];
 	/**
-	 * Set error flag for text field input
+	 * Lets the field fill the width of its container. Without it the field is
+	 * as wide as its sections need, at least MUI's 182px for them. When set,
+	 * also to `false`, it takes precedence over `slotProps.textField.fullWidth`;
+	 * leave it undefined to use that (MUI's default: `false`).
 	 */
 	fullWidth?: TextFieldProps["fullWidth"];
 	/**
@@ -282,7 +292,10 @@ const LocalizedKeyboardDatePicker = (
 						);
 						return withFieldBlur(
 							ownerState,
-							withFieldName(withReportWhenDone(fieldProps, draft), ariaLabel),
+							withFieldName(
+								withFittingSections(withReportWhenDone(fieldProps, draft)),
+								ariaLabel,
+							),
 							{
 								name: otherProps.name,
 								onFieldFocus: validation.onFieldFocus,

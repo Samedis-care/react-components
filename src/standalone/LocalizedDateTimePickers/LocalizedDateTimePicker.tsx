@@ -27,6 +27,7 @@ import withAccessibleError from "./withAccessibleError";
 import withRequiredSections from "./withRequiredSections";
 import useFieldBlur from "./useFieldBlur";
 import withFieldName from "./withFieldName";
+import withFittingSections from "./withFittingSections";
 import withReportWhenDone from "./withReportWhenDone";
 import calendarNameSlotProps from "./calendarNameSlotProps";
 import calendarFocusRingSlotProps from "./calendarFocusRingSlotProps";
@@ -74,6 +75,13 @@ const DESKTOP_MODE_MEDIA_QUERY =
  * the default `slots.openPickerButton`, which a caller's own button replaces,
  * and goes into `slotProps.layout.sx`, which keeps a caller's layout slot
  * props and puts a caller's `sx` after it.
+ *
+ * Without `fullWidth` the field is as wide as its sections need, at least
+ * MUI's 182px: where the date and time need more (with the user's text
+ * spacing, WCAG 1.4.12, with seconds or a long `format`), the field grows
+ * rather than cutting off their end behind the calendar button. With
+ * `fullWidth` it takes the width of its container, as in MUI (see
+ * `withFittingSections`).
  *
  * The button that opens the calendar is named after the date and the time the
  * field shows, in the components-care language: "Choose date and time,
@@ -127,7 +135,10 @@ export interface LocalizedDateTimePickerProps extends DateTimePickerProps {
 	 */
 	error?: TextFieldProps["error"];
 	/**
-	 * Set error flag for text field input
+	 * Lets the field fill the width of its container. Without it the field is
+	 * as wide as its sections need, at least MUI's 182px for them. When set,
+	 * also to `false`, it takes precedence over `slotProps.textField.fullWidth`;
+	 * leave it undefined to use that (MUI's default: `false`).
 	 */
 	fullWidth?: TextFieldProps["fullWidth"];
 	/**
@@ -352,7 +363,10 @@ const LocalizedDateTimePicker = (
 						);
 						return withFieldBlur(
 							ownerState,
-							withFieldName(withReportWhenDone(fieldProps, draft), ariaLabel),
+							withFieldName(
+								withFittingSections(withReportWhenDone(fieldProps, draft)),
+								ariaLabel,
+							),
 							{
 								name: otherProps.name,
 								onFieldFocus: validation.onFieldFocus,
