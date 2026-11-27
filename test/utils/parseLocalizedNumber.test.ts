@@ -214,6 +214,35 @@ describe("parseLocalizedNumber", () => {
 			expect(parseLocalizedNumber(text, options)).toBe(expected);
 		},
 	);
+
+	// the Caribbean guilder's symbol "Cg." contains a dot, the decimal separator of en
+	const XCG: Intl.NumberFormatOptions = { style: "currency", currency: "XCG" };
+
+	it.each(["de", "en", "es", "fr", "it", "nl", "ru", "uz", "en-IN"])(
+		"[ISSUE-3484-ITEM-11] reads back the XCG amounts %s formats",
+		async (locale) => {
+			await ccI18n.changeLanguage(locale);
+			for (const num of [5, 0.5, 1234.5, -1234.5, 1234567.25]) {
+				const formatted = num.toLocaleString(locale, XCG);
+				expect(parseLocalizedNumber(formatted, XCG), formatted).toBe(num);
+			}
+		},
+	);
+
+	it.each<[string, string, number | null]>([
+		// the symbol typed without the blank, or after the number
+		["en", "Cg.5", 5],
+		["en", "Cg.1,234.5", 1234.5],
+		["en", "5 Cg.", 5],
+		["en", "Cg. -5", -5],
+		["nl", "Cg.1.234,5", 1234.5],
+	])(
+		"[ISSUE-3484-ITEM-11] reads %s text %j in XCG as %s",
+		async (locale, text, expected) => {
+			await ccI18n.changeLanguage(locale);
+			expect(parseLocalizedNumber(text, XCG)).toBe(expected);
+		},
+	);
 });
 
 describe("getNumberSeparator", () => {

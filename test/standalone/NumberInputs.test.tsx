@@ -519,6 +519,54 @@ describe("CurrencyInput", () => {
 			expect(reported(onValue)).toEqual([12346]);
 		});
 
+		it("[ISSUE-3484-ITEM-11] keeps a typed amount in a currency whose symbol contains a dot (XCG, Cg.)", () => {
+			const onValue: ValueSpy = vi.fn();
+			render(
+				<Controlled initial={null} onValue={onValue}>
+					{(value, onChange) => (
+						<CurrencyInput
+							label="Amount"
+							currency="XCG"
+							value={value}
+							onChange={onChange}
+						/>
+					)}
+				</Controlled>,
+			);
+			fireEvent.change(field("Amount"), { target: { value: "5" } });
+			fireEvent.blur(field("Amount"));
+			expect(reported(onValue)).toEqual([5]);
+		});
+
+		it("[ISSUE-3484-ITEM-11] shows a typed XCG amount as Cg. 5.00, and reads an edit of that text back", () => {
+			const XCG: Intl.NumberFormatOptions = {
+				style: "currency",
+				currency: "XCG",
+			};
+			const onValue: ValueSpy = vi.fn();
+			render(
+				<Controlled initial={null} onValue={onValue}>
+					{(value, onChange) => (
+						<CurrencyInput
+							label="Amount"
+							currency="XCG"
+							value={value}
+							onChange={onChange}
+						/>
+					)}
+				</Controlled>,
+			);
+			fireEvent.change(field("Amount"), { target: { value: "5" } });
+			fireEvent.blur(field("Amount"));
+			expect(field("Amount")).toHaveValue(fmt("en", 5, XCG));
+			fireEvent.change(field("Amount"), {
+				target: { value: fmt("en", -1234.5, XCG) },
+			});
+			fireEvent.blur(field("Amount"));
+			expect(reported(onValue)).toEqual([5, -1234.5]);
+			expect(field("Amount")).toHaveValue(fmt("en", -1234.5, XCG));
+		});
+
 		it("[ISSUE-3484-ITEM-3] keeps the sign of a negative amount", () => {
 			const onValue: ValueSpy = vi.fn();
 			render(
