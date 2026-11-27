@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import {
 	describe,
 	it,
@@ -15,6 +15,7 @@ import {
 	render,
 	screen,
 	waitFor,
+	within,
 } from "@testing-library/react";
 import { createTheme, Tab, ThemeProvider } from "@mui/material";
 import { createMemoryHistory, History, InitialEntry } from "history";
@@ -663,6 +664,191 @@ describe("RoutedTabs: bugs", () => {
 		expect(getTabId("/settings", "über")).not.toBe(
 			getTabId("/settings", "uber"),
 		);
+	});
+
+	it("[ISSUE-3500-ITEM-11] the tab bar stays rendered while the new tab's panel suspends", async () => {
+		let release: (() => void) | null = null;
+		const LazyPanel = React.lazy(
+			() =>
+				new Promise<{ default: React.ComponentType }>((resolve) => {
+					release = () => resolve({ default: () => <div>LAZY PANEL</div> });
+				}),
+		);
+		const WithLazy = () => {
+			const tab = useRoutedTabPanel();
+			return (
+				<>
+					<RoutedTabs aria-label="Settings">
+						<Tab label="Main" value="" />
+						<Tab label="Lazy" value="lazy" />
+					</RoutedTabs>
+					<RoutedTabPanelWrapper>
+						{[tab("lazy", <LazyPanel />), tab("", <div>MAIN PANEL</div>)]}
+					</RoutedTabPanelWrapper>
+				</>
+			);
+		};
+		const h = mem("/settings");
+		// a Suspense boundary above the routed page, as CRUD's form wrapper has
+		render(
+			<HistoryRouter history={h}>
+				<Suspense fallback={<div>PAGE FALLBACK</div>}>
+					<Routes>
+						{[<Route key="page" path="/settings/*" element={<WithLazy />} />]}
+					</Routes>
+				</Suspense>
+			</HistoryRouter>,
+		);
+		fireEvent.click(tabEl("Lazy"));
+		await act(async () => {});
+		try {
+			// a fix may show the new tab selected over a loading panel, or keep the old
+			// panel until the new one is ready (a transition): either way the bar stays
+			expect(screen.queryByText("PAGE FALLBACK")).toBeNull();
+			expect(screen.getByRole("tablist", { name: "Settings" })).toBeVisible();
+		} finally {
+			await act(async () => {
+				release?.();
+				await Promise.resolve();
+			});
+		}
+		expect(await screen.findByText("LAZY PANEL")).toBeInTheDocument();
+		expect(selected()).toEqual(["Lazy"]);
+	});
+
+	/**
+	 * A bar with a Main and a Lazy tab, whose Lazy panel (a button) loads its
+	 * code on first open, below a Suspense boundary above the bar, as CRUD's form
+	 * wrapper has
+	 * @param wrapperProps Props for the RoutedTabPanelWrapper
+	 * @returns The page, and `release`, which delivers the panel's code
+	 */
+	const lazyTabsPage = (wrapperProps?: Partial<RoutedTabPanelWrapperProps>) => {
+		let resolveCode: (() => void) | null = null;
+		const LazyPanel = React.lazy(
+			() =>
+				new Promise<{ default: React.ComponentType }>((resolve) => {
+					resolveCode = () =>
+						resolve({ default: () => <button>LAZY BUTTON</button> });
+				}),
+		);
+		const WithLazy = () => {
+			const tab = useRoutedTabPanel();
+			return (
+				<>
+					<RoutedTabs aria-label="Settings">
+						<Tab label="Main" value="" />
+						<Tab label="Lazy" value="lazy" />
+					</RoutedTabs>
+					<RoutedTabPanelWrapper {...wrapperProps}>
+						{[tab("lazy", <LazyPanel />), tab("", <div>MAIN PANEL</div>)]}
+					</RoutedTabPanelWrapper>
+				</>
+			);
+		};
+		const page = (
+			<Suspense fallback={<div>PAGE FALLBACK</div>}>
+				<WithLazy />
+			</Suspense>
+		);
+		const release = () =>
+			act(async () => {
+				resolveCode?.();
+				await Promise.resolve();
+			});
+		return { page, release };
+	};
+
+	it("[ISSUE-3500-ITEM-11] while the new tab's panel loads, the panel is a busy tab stop around a loading status, and the tab keeps the focus", async () => {
+		const { page, release } = lazyTabsPage();
+		renderAt(mem("/settings"), page);
+		act(() => tabEl("Lazy").focus());
+		fireEvent.click(tabEl("Lazy"));
+		await act(async () => {});
+		try {
+			const panel = screen.getByRole("tabpanel", { name: "Lazy" });
+			expect(panel).toHaveAttribute("aria-busy", "true");
+			expect(panel).toHaveAttribute("tabindex", "0");
+			const status = within(panel).getByRole("status");
+			// announced although the panel around it is busy
+			expect(status).toHaveAttribute("aria-busy", "false");
+			expect(
+				within(status).getByRole("progressbar", { name: "Loading…" }),
+			).toBeInTheDocument();
+			expect(tabEl("Lazy")).toHaveFocus();
+		} finally {
+			await release();
+		}
+		const panel = screen.getByRole("tabpanel", { name: "Lazy" });
+		expect(
+			await within(panel).findByRole("button", { name: "LAZY BUTTON" }),
+		).toBeInTheDocument();
+		expect(panel).not.toHaveAttribute("aria-busy");
+		expect(within(panel).queryByRole("status")).toBeNull();
+		await waitFor(() => expect(panel).not.toHaveAttribute("tabindex"));
+		expect(tabEl("Lazy")).toHaveFocus();
+	});
+
+	it("[ISSUE-3500-ITEM-11] a link straight to a tab whose panel suspends shows the bar over the busy panel, also in StrictMode", async () => {
+		const { page, release } = lazyTabsPage();
+		render(
+			<React.StrictMode>
+				{routed(mem("/settings/lazy"), page)}
+			</React.StrictMode>,
+		);
+		await act(async () => {});
+		try {
+			expect(screen.queryByText("PAGE FALLBACK")).toBeNull();
+			expect(selected()).toEqual(["Lazy"]);
+			expect(screen.getByRole("tabpanel", { name: "Lazy" })).toHaveAttribute(
+				"aria-busy",
+				"true",
+			);
+		} finally {
+			await release();
+		}
+		expect(
+			await screen.findByRole("button", { name: "LAZY BUTTON" }),
+		).toBeInTheDocument();
+		expect(screen.getByRole("tabpanel", { name: "Lazy" })).not.toHaveAttribute(
+			"aria-busy",
+		);
+	});
+
+	it("[ISSUE-3500-ITEM-11] fallback replaces the loader, and with fallback={null} the panel is empty and busy", async () => {
+		const custom = lazyTabsPage({ fallback: <p>LOADING LAZY</p> });
+		const { unmount } = renderAt(mem("/settings/lazy"), custom.page);
+		await act(async () => {});
+		try {
+			const panel = screen.getByRole("tabpanel", { name: "Lazy" });
+			expect(panel).toHaveTextContent("LOADING LAZY");
+			expect(within(panel).queryByRole("status")).toBeNull();
+			expect(panel).toHaveAttribute("aria-busy", "true");
+		} finally {
+			await custom.release();
+		}
+		expect(
+			await screen.findByRole("button", { name: "LAZY BUTTON" }),
+		).toBeInTheDocument();
+		expect(screen.queryByText("LOADING LAZY")).toBeNull();
+		expect(screen.getByRole("tabpanel", { name: "Lazy" })).not.toHaveAttribute(
+			"aria-busy",
+		);
+		unmount();
+
+		const none = lazyTabsPage({ fallback: null });
+		renderAt(mem("/settings/lazy"), none.page);
+		await act(async () => {});
+		try {
+			const panel = screen.getByRole("tabpanel", { name: "Lazy" });
+			expect(panel).toBeEmptyDOMElement();
+			expect(panel).toHaveAttribute("aria-busy", "true");
+		} finally {
+			await none.release();
+		}
+		expect(
+			await screen.findByRole("button", { name: "LAZY BUTTON" }),
+		).toBeInTheDocument();
 	});
 
 	it("[ISSUE-3500-ITEM-14] the panel wrapper takes conditional entries as separate JSX children, and tab takes any element", () => {

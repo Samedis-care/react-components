@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
 import { expect, userEvent, waitFor, within } from "storybook/test";
@@ -13,6 +13,7 @@ import {
 	Typography,
 } from "@mui/material";
 import { createMemoryHistory } from "history";
+import Loader from "../../standalone/Loader";
 import HistoryRouter from "../../standalone/Routes/HistoryRouter";
 import Routes from "../../standalone/Routes/Routes";
 import Route from "../../standalone/Routes/Route";
@@ -958,5 +959,108 @@ export const Issue3500Item10WideBarsLookAsBefore: Story = {
 				).toBe(true);
 			}
 		}
+	},
+};
+
+/** The Report panel, whose code arrives when the story's button is pressed */
+const ReportPanel = () => (
+	<Panel name="Report" text="Monthly figures, loaded on first open." />
+);
+
+/**
+ * A lazy Report panel and the function that delivers its code, made once per
+ * story mount
+ */
+const createLazyReport = () => {
+	let finish: () => void = () => undefined;
+	const code = new Promise<{ default: React.ComponentType }>((resolve) => {
+		finish = () => resolve({ default: ReportPanel });
+	});
+	return { finish, LazyReport: React.lazy(() => code) };
+};
+
+/** A bar with a General and a Report tab */
+const ReportTabs = (props: { report: React.ReactElement }) => {
+	const tab = useRoutedTabPanel();
+	return (
+		<Box sx={{ width: "100%" }}>
+			<RoutedTabs aria-label="Settings">
+				<Tab label="General" value="" />
+				<Tab label="Report" value="report" />
+			</RoutedTabs>
+			<RoutedTabPanelWrapper>
+				{[
+					tab("report", props.report),
+					tab(
+						"",
+						<Panel name="General" text="General settings and preferences." />,
+					),
+				]}
+			</RoutedTabPanelWrapper>
+		</Box>
+	);
+};
+
+/**
+ * The Report panel loads its code on first open; the page has a Suspense
+ * boundary of its own above the bar, as a CRUD form has
+ */
+const LazyPanelTabs = () => {
+	const [{ finish, LazyReport }] = useState(createLazyReport);
+	return (
+		<>
+			<Button sx={{ m: 2 }} variant="outlined" onClick={finish}>
+				Finish loading the report
+			</Button>
+			<Host at="/settings">
+				<Suspense fallback={<Loader text="Loading the page…" />}>
+					<ReportTabs report={<LazyReport />} />
+				</Suspense>
+			</Host>
+		</>
+	);
+};
+
+export const Issue3500Item11BarStaysWhilePanelLoads: Story = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					'ISSUE-3500-ITEM-11: the Report panel loads its code on first open (`React.lazy`), and the page has a Suspense boundary of its own above the bar. Open Report with the keyboard: the bar stays and keeps the focus, the panel shows a loader and is `aria-busy`. Press "Finish loading the report" to deliver the code.',
+			},
+		},
+	},
+	render: () => <LazyPanelTabs />,
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const [general, report] = tabsOf(canvasElement);
+		general.focus();
+		await userEvent.keyboard("{ArrowRight}");
+		await expect(report).toHaveFocus();
+		await userEvent.keyboard("{Enter}");
+
+		// the bar stays, with the focus on the opened tab, over a loading panel
+		const panel = await canvas.findByRole("tabpanel", { name: "Report" });
+		await expect(canvas.queryByText("Loading the page…")).toBeNull();
+		await expect(
+			canvas.getByRole("tablist", { name: "Settings" }),
+		).toBeVisible();
+		await expect(report).toHaveFocus();
+		await expect(report).toHaveAttribute("aria-selected", "true");
+		await expect(panel).toHaveAttribute("aria-busy", "true");
+		await expect(within(panel).getByRole("status")).toBeVisible();
+		await expect(
+			within(panel).getByRole("progressbar", { name: "Loading…" }),
+		).toBeVisible();
+
+		// the code arrives (a DOM click, which leaves the focus on the tab)
+		canvas.getByRole("button", { name: "Finish loading the report" }).click();
+		await expect(
+			await within(panel).findByRole("heading", { name: "Report" }),
+		).toBeVisible();
+		await expect(panel).not.toHaveAttribute("aria-busy");
+		await expect(within(panel).queryByRole("status")).toBeNull();
+		await expect(report).toHaveFocus();
 	},
 };

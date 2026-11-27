@@ -1,11 +1,20 @@
-import React, { useCallback, useLayoutEffect, useRef, useState } from "react";
+import React, {
+	Suspense,
+	useCallback,
+	useLayoutEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import { styled, useThemeProps } from "@mui/material";
+import Loader from "../../standalone/Loader";
 import Routes from "../../standalone/Routes/Routes";
 import { useRouteInfo, useRoutePrefix } from "../../standalone/Routes/Route";
 import useLocation from "../../standalone/Routes/useLocation";
 import findMatchingRoute from "../../standalone/Routes/findMatchingRoute";
 import routeEntries from "../../standalone/Routes/routeEntries";
 import { getTabId, getTabPanelId } from "./tabPanelIds";
+import RoutedTabPanelFallback from "./RoutedTabPanelFallback";
 
 /**
  * Props of {@link RoutedTabPanelWrapper}
@@ -23,9 +32,32 @@ export interface RoutedTabPanelWrapperProps {
 	 * CSS class of the panel element, after the theme's.
 	 */
 	className?: string;
+	/**
+	 * What the panel shows while its content suspends (a `React.lazy`
+	 * component, a `useTranslation` namespace that has not loaded yet, a
+	 * suspending query): the fallback of the Suspense boundary that the
+	 * wrapper renders inside the tabpanel. The tab bar, the tab that opened
+	 * the panel and its focus stay meanwhile, and the tabpanel is
+	 * `aria-busy="true"`. A panel that suspends again after it has shown
+	 * (a later suspending render) is hidden and shows the fallback too.
+	 *
+	 * Default: a `Loader`, a polite status (`role="status"`) whose spinner is
+	 * named "Loading…" in the library's language. It is `aria-busy="false"`,
+	 * so that a screen reader that holds back the changes of the busy panel
+	 * still announces it. `null` shows nothing (the panel is still
+	 * `aria-busy`). A Suspense boundary inside the panel element catches its
+	 * content first.
+	 */
+	fallback?: React.ReactNode;
 }
 
 export type RoutedTabPanelWrapperClassKey = "root";
+
+/**
+ * The default `fallback`: a Loader that a screen reader announces inside the
+ * busy panel
+ */
+const DEFAULT_FALLBACK = <Loader aria-busy={false} />;
 
 const Root = styled("div", {
 	name: "CcRoutedTabPanelWrapper",
@@ -121,6 +153,13 @@ const tabValue = (path: string): string =>
  * - While the panel itself has focus it stays a tab stop, so focus is not
  *   dropped to the body when a control appears under it; the flag is
  *   recomputed when it loses focus.
+ * - The panel content renders inside a Suspense boundary of the wrapper's
+ *   own, within the tabpanel: while it suspends (`React.lazy`, a translation
+ *   namespace that is still loading, a suspending query), the panel shows
+ *   `fallback` (a Loader by default) and is `aria-busy="true"`. The tab bar
+ *   above stays, and so does the focus on the tab that opened the panel;
+ *   without this boundary, the nearest one above (a page's, a CRUD form's)
+ *   would hide the bar behind its own fallback.
  * - The panel is a `CcRoutedTabPanelWrapper` root: style it with
  *   `theme.components.CcRoutedTabPanelWrapper.styleOverrides.root` or the
  *   `className` prop. It has no padding or paper of its own: add it to the
@@ -136,7 +175,7 @@ const RoutedTabPanelWrapper = (inProps: RoutedTabPanelWrapperProps) => {
 		props: inProps,
 		name: "CcRoutedTabPanelWrapper",
 	});
-	const { children, className } = props;
+	const { children, className, fallback = DEFAULT_FALLBACK } = props;
 	const entries = routeEntries(children);
 	const { pathname } = useLocation();
 	const routePrefix = useRoutePrefix();
@@ -144,6 +183,16 @@ const RoutedTabPanelWrapper = (inProps: RoutedTabPanelWrapperProps) => {
 	const { url } = useRouteInfo();
 	const panelRef = useRef<HTMLDivElement>(null);
 	const [hasFocusableContent, setHasFocusableContent] = useState(false);
+	// the Suspense fallback shows: the panel's content is loading
+	const [busy, setBusy] = useState(false);
+	const suspenseFallback = useMemo(
+		() => (
+			<RoutedTabPanelFallback onShownChange={setBusy}>
+				{fallback}
+			</RoutedTabPanelFallback>
+		),
+		[fallback],
+	);
 	const updateTabStop = useCallback(() => {
 		const panel = panelRef.current;
 		if (panel === null) return;
@@ -189,9 +238,12 @@ const RoutedTabPanelWrapper = (inProps: RoutedTabPanelWrapperProps) => {
 			id={getTabPanelId(url, value)}
 			aria-labelledby={getTabId(url, value)}
 			tabIndex={hasFocusableContent ? undefined : 0}
+			aria-busy={busy || undefined}
 			className={className}
 		>
-			<Routes>{entries}</Routes>
+			<Suspense fallback={suspenseFallback}>
+				<Routes>{entries}</Routes>
+			</Suspense>
 		</Root>
 	);
 };
