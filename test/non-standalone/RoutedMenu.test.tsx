@@ -10,6 +10,7 @@ import {
 } from "@testing-library/react";
 import { createTheme, List, ThemeProvider } from "@mui/material";
 import {
+	Action,
 	createBrowserHistory,
 	createHashHistory,
 	createMemoryHistory,
@@ -1219,5 +1220,94 @@ describe("RoutedMenu: focus when the menu is swapped", () => {
 		expect(history.location.pathname).toBe("/apps");
 		expect(entry("Apps")).toHaveClass("Mui-selected");
 		expect(document.activeElement).toBe(entry("Apps"));
+	});
+});
+
+describe("RoutedMenu: a click on the entry of the current location", () => {
+	/** The action of each navigation of `history` from now on */
+	const recordActions = (history: History) => {
+		const actions: Action[] = [];
+		history.listen(({ action }) => actions.push(action));
+		return actions;
+	};
+
+	it("[ISSUE-3498-ITEM-13] replaces its history entry, so a single Back leaves the page", () => {
+		const onClick = vi.fn();
+		const history = createMemoryHistory({
+			initialEntries: ["/profile", "/users"],
+			initialIndex: 1,
+		});
+		mountWith(
+			[leaf("Profile", "/profile"), leaf("Users", "/users", { onClick })],
+			history,
+		);
+		const actions = recordActions(history);
+		fireEvent.click(entry("Users"));
+		fireEvent.click(entry("Users"));
+		expect(actions).toEqual([Action.Replace, Action.Replace]);
+		expect(onClick).toHaveBeenCalledTimes(2);
+		expect(history.index).toBe(1);
+		expect(selected()).toEqual(["Users"]);
+		act(() => history.back());
+		expect(history.location.pathname).toBe("/profile");
+		expect(selected()).toEqual(["Profile"]);
+	});
+
+	it.each([
+		["/users", "/users", Action.Replace],
+		["/users?page=2#x", "/users", Action.Push],
+		["/users/5/edit", "/users", Action.Push],
+		["/tasks?tab=open#list", "/tasks?tab=open#list", Action.Replace],
+		["/tasks?tab=open", "/tasks?tab=open#list", Action.Push],
+		["/tasks?tab=open&page=2#list", "/tasks?tab=open#list", Action.Push],
+		// a param is filled in percent-encoded, a memory history keeps it as pushed
+		["/devices/über", "/devices/:id", Action.Replace],
+		// leading slashes collapse into one, as useNavigate's target
+		["/devices", "//devices", Action.Replace],
+	])(
+		"[ISSUE-3498-ITEM-13] compares pathname, search and hash as a link does: at %s, a click on the entry %s makes a %s",
+		(start, route, action) => {
+			const { history } = mount([leaf("Entry", route)], start);
+			const actions = recordActions(history);
+			fireEvent.click(entry("Entry"));
+			expect(actions).toEqual([action]);
+		},
+	);
+
+	it("[ISSUE-3498-ITEM-13] at a URL with a search and a hash, the entry of the page goes to its own route, and Back returns to the URL", () => {
+		const { history } = mount(USERS_MENU, "/users?page=2#x");
+		fireEvent.click(entry("Users"));
+		expect(createPath(history.location)).toBe("/users");
+		expect(history.index).toBe(1);
+		act(() => history.back());
+		expect(createPath(history.location)).toBe("/users?page=2#x");
+	});
+
+	it("[ISSUE-3498-ITEM-13] useRoutedMenuLogic: a plain click on the link of the current location replaces its history entry", () => {
+		const UsersLink = () => {
+			const { definition } = useRoutedMenuLogic({ definition: USERS_MENU });
+			const users = definition[1];
+			return (
+				<a href={users.href} onClick={users.onClick}>
+					{users.title}
+				</a>
+			);
+		};
+		const history = createMemoryHistory({
+			initialEntries: ["/profile", "/users"],
+			initialIndex: 1,
+		});
+		render(
+			<HistoryRouter history={history}>
+				<UsersLink />
+			</HistoryRouter>,
+		);
+		const actions = recordActions(history);
+		// false: the browser does not load the href as a new page
+		expect(fireEvent.click(screen.getByRole("link", { name: "Users" }))).toBe(
+			false,
+		);
+		expect(actions).toEqual([Action.Replace]);
+		expect(history.index).toBe(1);
 	});
 });

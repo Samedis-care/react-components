@@ -20,6 +20,7 @@ import {
 import { RouteContext, useRoutePrefix } from "../../../standalone/Routes/Route";
 import { useHistoryRouterContext } from "../../../standalone/Routes/HistoryRouter";
 import toAppPath from "../../../standalone/Routes/toAppPath";
+import { isCurrentLocation } from "../../../standalone/Routes/navigationTarget";
 import MenuBase, {
 	IMenuItemDefinition,
 	MenuProps,
@@ -47,12 +48,20 @@ export interface IRoutedMenuItemDefinition extends Omit<
 	 *   highlight: `/tasks?tab=open` navigates to `/tasks?tab=open` and is
 	 *   highlighted on `/tasks` with any search, so entries that differ only in
 	 *   their search or hash match the same pages. The current URL's search and
-	 *   hash are not kept.
+	 *   hash are not kept: on `/users?page=2#list`, a click on `/users` goes to
+	 *   `/users`, and Back returns to `/users?page=2#list`.
 	 * - A route without a leading slash is relative to the Route the menu is
 	 *   rendered in. Inside `<Route path="/apps/:app/*">`, `users` is
 	 *   highlighted on `/apps/a1/users` and navigates there from every page
 	 *   below `/apps/a1`, including pages that no entry matches. Outside of any
 	 *   Route it is the same as `/users`.
+	 *
+	 * A click whose target is the current location (the same pathname, search
+	 * and hash, as the URL parser reads them) replaces the history entry
+	 * instead of pushing a second one, as a plain link does in a browser and as
+	 * `Link` does: clicking the entry of the current page any number of times
+	 * leaves one entry for it, so a single Back leaves the page. The page still
+	 * scrolls to the top, as after every navigation.
 	 *
 	 * The route matches the current URL as a prefix: `/devices` matches
 	 * `/devices/5/edit` (`/` matches only `/`). A home entry under a base
@@ -160,11 +169,14 @@ export interface IRoutedMenuEntry extends Omit<
 	 * (`href`) in the app. Put it on the element that renders the entry.
 	 *
 	 * On a link (an `<a>` with `href`): a plain click is kept from loading the
-	 * href as a new page and navigates in the app; a click with Ctrl, Meta,
-	 * Shift or Alt is left to the browser, which opens the link in a new tab or
-	 * window. On any other element (a button): a click with Ctrl, Meta or Shift
-	 * opens `href` in a new tab, any other click navigates in the app. An entry
-	 * without target only runs the definition's `onClick`.
+	 * href as a new page and navigates in the app, replacing the history entry
+	 * when `href` is the current location (see IRoutedMenuItemDefinition's
+	 * `route`) and pushing one otherwise; a click with Ctrl, Meta, Shift or Alt
+	 * is left to the browser, which opens the link in a new tab or window. On
+	 * any other element (a button): a click with Ctrl, Meta or Shift opens
+	 * `href` in a new tab, any other click navigates in the app as a plain
+	 * click on a link does. An entry without target only runs the definition's
+	 * `onClick`.
 	 */
 	onClick: React.MouseEventHandler;
 	/**
@@ -584,6 +596,26 @@ const getTargetHref = (history: History, target: string): string | null => {
 };
 
 /**
+ * Navigates to an entry's target in the app, as a plain click on a link to it
+ * does: it replaces the history entry when the target is the current location
+ * (the same pathname, search and hash), so a click on the entry of the current
+ * page adds no second entry for it, and pushes otherwise
+ * @param navigate The navigate function of the HistoryRouter
+ * @param history The router's history, whose location is the current one
+ * @param target The entry's navigation target (getTarget)
+ */
+const navigateToTarget = (
+	navigate: NavigateFunction,
+	history: History,
+	target: string,
+): void => {
+	const path = toAppPath(target);
+	navigate(target, {
+		replace: path !== null && isCurrentLocation(history.location, path),
+	});
+};
+
+/**
  * The entries hidden because the current URL cannot fill their route: only
  * entries the definition renders (`shouldRender`), and not the entries below
  * such an entry
@@ -695,10 +727,10 @@ const convertDefinition = (
 				// the browser opens a new tab or window for a modified click
 				if (evt.ctrlKey || evt.metaKey || evt.shiftKey || evt.altKey) return;
 				evt.preventDefault();
-				navigate(target);
+				navigateToTarget(navigate, history, target);
 			} else if (evt.ctrlKey || evt.metaKey || evt.shiftKey) {
 				if (href) window.open(href, "_blank");
-			} else navigate(target);
+			} else navigateToTarget(navigate, history, target);
 		},
 		onAuxClick: (evt) => {
 			// the middle button only: browsers fire auxclick for the right button
@@ -847,12 +879,13 @@ export const useRoutedMenuLogic = (
  * A MenuBase driven by the URL: the shown entry whose `route` matches the
  * current path best is highlighted and the groups above it are expanded (see
  * IRoutedMenuItemDefinition's `route`; groups with `forceExpand` are
- * expanded on every page), and a click on an entry runs its
- * `onClick` and navigates to its route. A click on a group only expands or
+ * expanded on every page), and a click on an entry runs its `onClick` and
+ * navigates to its route, replacing the history entry when the route is the
+ * current location, as a link does. A click on a group only expands or
  * collapses it (and runs its `onClick`): a group has no page of its own, its
- * `route` is ignored. A Ctrl, Meta or Shift click and a
- * middle click open the URL of that navigation in a new tab instead, as the
- * history writes it (`#/users` with a hash history). The highlight follows
+ * `route` is ignored. A Ctrl, Meta or Shift click and a middle click open
+ * the URL of that navigation in a new tab instead, as the history writes it
+ * (`#/users` with a hash history). The highlight follows
  * the URL only: on a path that matches no entry nothing is highlighted, and
  * a click highlights nothing by itself, only the navigation it starts does.
  * Must be rendered inside a HistoryRouter; rendered inside a Route, its

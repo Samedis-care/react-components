@@ -10,7 +10,11 @@ import { useHistoryRouterContext } from "./HistoryRouter";
 import useNavigate from "./useNavigate";
 import useLocation from "./useLocation";
 import toAppPath from "./toAppPath";
-import { navigationTarget, normalizedUrl } from "./navigationTarget";
+import {
+	isCurrentLocation,
+	navigationTarget,
+	normalizedUrl,
+} from "./navigationTarget";
 
 /**
  * Props of {@link Link}: the target and every `<a>` attribute except `href`,
@@ -115,16 +119,6 @@ export interface LinkProps extends Omit<
  */
 const navigationHref = (history: History, location: Location, to: To): string =>
 	history.createHref(navigationTarget(location, to));
-
-/**
- * Does a click on the target stay at the current location? Pathname, search
- * and hash are compared as the URL parser reads them, so "/über" is the
- * current location at "/%C3%BCber"; the state is not compared.
- * @param location The current location
- * @param to The target, with leading slashes already collapsed
- */
-const isCurrentLocation = (location: Location, to: To): boolean =>
-	normalizedUrl(navigationTarget(location, to)) === normalizedUrl(location);
 
 /**
  * Does the link lead to the current page, for `markCurrent`? The location has

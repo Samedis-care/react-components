@@ -35,3 +35,15 @@ export const navigationTarget = (
  */
 export const normalizedUrl = (path: Partial<Path>): string =>
 	new URL(`http://localhost/${createPath(path)}`).href;
+
+/**
+ * Does a navigation to the target stay at the current location? Pathname,
+ * search and hash are compared as the URL parser reads them, so "/über" is the
+ * current location at "/%C3%BCber"; the state is not compared. A click on a
+ * link to the current location replaces the history entry instead of pushing
+ * a second one, as a browser does for a plain `<a>`.
+ * @param location The current location
+ * @param to The target, with leading slashes already collapsed
+ */
+export const isCurrentLocation = (location: Location, to: To): boolean =>
+	normalizedUrl(navigationTarget(location, to)) === normalizedUrl(location);
