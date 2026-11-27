@@ -1,10 +1,11 @@
 import React, { useCallback } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
-import { expect, fn, userEvent, within } from "storybook/test";
+import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 import {
 	Avatar,
 	Box,
+	Button,
 	createTheme,
 	ThemeProvider,
 	Typography,
@@ -1663,6 +1664,220 @@ export const Issue3481Item19HighlightRingStandsOut: Story = {
 				).toBeGreaterThanOrEqual(3);
 			}
 		}
+	},
+};
+
+/** ISSUE-3481-ITEM-22: labels sized by their length alone are cut off in split and stacked pairs, and in the horizontal flow. */
+const TIGHT_ROWS: MatrixRow<TileCell>[] = [
+	{
+		key: "a",
+		label: "Alice Weber",
+		cells: {
+			t2: {
+				items: [
+					{ ...EARLY, label: "MW" },
+					{ ...LATE, label: "RD" },
+				],
+			},
+			t3: {
+				items: [
+					{ ...EARLY, secondaryLabel: "ICU" },
+					{ ...LATE, secondaryLabel: "OP" },
+				],
+				column: true,
+			},
+			t4: { items: [{ ...EARLY, secondaryLabel: "ICU", flow: "horizontal" }] },
+		},
+	},
+];
+
+export const Issue3481Item22LabelsFitTheirEntries: Story = {
+	render: (args) => (
+		<TileRoster onItemClick={args.onItemClick} rows={TIGHT_ROWS} readOnly />
+	),
+	play: async ({ canvasElement }) => {
+		for (const column of [1, 2, 3]) {
+			for (const entry of Array.from(
+				tileCell(canvasElement, 0, column).querySelectorAll<HTMLElement>(
+					"[role=button]",
+				),
+			)) {
+				const box = entry.getBoundingClientRect();
+				const walker = document.createTreeWalker(entry, NodeFilter.SHOW_TEXT);
+				for (let text = walker.nextNode(); text; text = walker.nextNode()) {
+					// what is drawn: not the spaces between the flex items, which
+					// are not rendered, nor the visually hidden words for the
+					// arrow and the state
+					if (
+						!text.textContent?.trim() ||
+						getComputedStyle(text.parentElement ?? entry).clipPath !== "none"
+					)
+						continue;
+					const range = document.createRange();
+					range.selectNodeContents(text);
+					const extent = range.getBoundingClientRect();
+					const where = `t${column + 1} "${text.textContent}"`;
+					await expect(extent.left, where).toBeGreaterThanOrEqual(
+						box.left - 0.5,
+					);
+					await expect(extent.right, where).toBeLessThanOrEqual(
+						box.right + 0.5,
+					);
+					await expect(extent.top, where).toBeGreaterThanOrEqual(box.top - 0.5);
+					await expect(extent.bottom, where).toBeLessThanOrEqual(
+						box.bottom + 0.5,
+					);
+				}
+			}
+		}
+	},
+};
+
+/** WCAG 1.4.12 text spacing, as a user's stylesheet or bookmarklet sets it */
+const TEXT_SPACING =
+	"letter-spacing: 0.12em !important; word-spacing: 0.16em !important; line-height: 1.5 !important;";
+
+/** the text an entry draws outside itself, each as `"text"` */
+const textOutside = (entry: HTMLElement): string[] => {
+	const box = entry.getBoundingClientRect();
+	const outside: string[] = [];
+	const walker = document.createTreeWalker(entry, NodeFilter.SHOW_TEXT);
+	for (let text = walker.nextNode(); text; text = walker.nextNode()) {
+		// what is drawn: not the spaces between the flex items, which are not
+		// rendered, nor the visually hidden words for the arrow and the state
+		if (
+			!text.textContent?.trim() ||
+			getComputedStyle(text.parentElement ?? entry).clipPath !== "none"
+		)
+			continue;
+		const range = document.createRange();
+		range.selectNodeContents(text);
+		const extent = range.getBoundingClientRect();
+		if (
+			extent.left < box.left - 0.5 ||
+			extent.right > box.right + 0.5 ||
+			extent.top < box.top - 0.5 ||
+			extent.bottom > box.bottom + 0.5
+		)
+			outside.push(`"${text.textContent}"`);
+	}
+	return outside;
+};
+
+/** the entries of row 0 in the given columns */
+const entriesIn = (canvasElement: HTMLElement, columns: number[]) =>
+	columns.flatMap((column) =>
+		Array.from(
+			tileCell(canvasElement, 0, column).querySelectorAll<HTMLElement>(
+				"[role=button]",
+			),
+		),
+	);
+
+/** the scale an entry draws its label, arrow and secondary label at */
+const drawnScale = (entry: HTMLElement) => {
+	const scale = getComputedStyle(entry.firstElementChild ?? entry).scale;
+	return scale === "none" ? 1 : parseFloat(scale);
+};
+
+export const Issue3481Item22LabelsFitWithTextSpacing: Story = {
+	parameters: { a11y: { test: "error" } },
+	render: (args) => (
+		<TileRoster onItemClick={args.onItemClick} rows={TIGHT_ROWS} readOnly />
+	),
+	play: async ({ canvasElement }) => {
+		const entries = entriesIn(canvasElement, [1, 2, 3]);
+		await expect(entries).toHaveLength(5);
+		// what fits is drawn at its own size
+		for (const entry of entries) await expect(drawnScale(entry)).toBe(1);
+		const spacing = document.createElement("style");
+		spacing.textContent = `[data-text-spacing] * { ${TEXT_SPACING} }`;
+		document.head.append(spacing);
+		canvasElement.setAttribute("data-text-spacing", "");
+		try {
+			// the spaced text is wider and taller than the entries ...
+			const outsideAtOnce = entries.flatMap(textOutside);
+			await expect(outsideAtOnce).not.toEqual([]);
+			// ... until they have measured it and drawn it smaller
+			await waitFor(() => expect(entries.flatMap(textOutside)).toEqual([]));
+		} finally {
+			canvasElement.removeAttribute("data-text-spacing");
+			spacing.remove();
+		}
+	},
+};
+
+/** ten characters: too wide for a whole tile even at the smallest size */
+const TOO_LONG_CODE = "WWWWWWWWWW";
+
+const SHORT_CODE_ROWS: MatrixRow<TileCell>[] = [
+	{
+		key: "a",
+		label: "Alice Weber",
+		cells: { t2: { items: [EARLY, LATE] }, t3: { items: [EARLY] } },
+	},
+];
+
+const LONG_CODE_ROWS: MatrixRow<TileCell>[] = [
+	{
+		key: "a",
+		label: "Alice Weber",
+		cells: {
+			t2: {
+				items: [
+					{ ...EARLY, label: "WWW" },
+					{ ...LATE, label: "MW" },
+				],
+			},
+			t3: { items: [{ ...EARLY, label: TOO_LONG_CODE }] },
+		},
+	},
+];
+
+/** the roster with the short codes, and a button that makes them longer */
+const LengtheningRoster = (props: {
+	onItemClick?: (item: MatrixTileItem) => void;
+}) => {
+	const [long, setLong] = React.useState(false);
+	const lengthen = useCallback(() => setLong(true), []);
+	return (
+		<>
+			<Button onClick={lengthen}>{"Longer codes"}</Button>
+			<TileRoster
+				onItemClick={props.onItemClick}
+				rows={long ? LONG_CODE_ROWS : SHORT_CODE_ROWS}
+				readOnly
+			/>
+		</>
+	);
+};
+
+export const Issue3481Item22LongerCodesAreDrawnSmaller: Story = {
+	parameters: { a11y: { test: "error" } },
+	render: (args) => <LengtheningRoster onItemClick={args.onItemClick} />,
+	play: async ({ canvasElement }) => {
+		for (const entry of entriesIn(canvasElement, [1, 2]))
+			await expect(drawnScale(entry)).toBe(1);
+		await userEvent.click(
+			within(canvasElement).getByRole("button", { name: "Longer codes" }),
+		);
+		await waitFor(() =>
+			expect(
+				within(tileCell(canvasElement, 0, 1)).getByText("WWW"),
+			).toBeInTheDocument(),
+		);
+		// the codes of the split pair are drawn smaller, as far as they need
+		const pair = entriesIn(canvasElement, [1]);
+		await waitFor(() => expect(pair.flatMap(textOutside)).toEqual([]));
+		await expect(drawnScale(pair[0])).toBeLessThan(1);
+		// a code too long for its entry is drawn at 8px, and no smaller
+		const [single] = entriesIn(canvasElement, [2]);
+		const code = within(single).getByText(TOO_LONG_CODE);
+		await waitFor(() =>
+			expect(
+				drawnScale(single) * parseFloat(getComputedStyle(code).fontSize),
+			).toBeCloseTo(8),
+		);
 	},
 };
 

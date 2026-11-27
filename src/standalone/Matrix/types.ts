@@ -178,6 +178,14 @@ export interface MatrixTileItem {
 	 * @remarks Outside a diagonal pair, a string or a number is drawn the
 	 * smaller the more characters it has (a number counts its digits, so 1234
 	 * is drawn like "1234"); any other node at the largest size.
+	 *
+	 * What does not fit the entry at that size is drawn smaller: the label,
+	 * the arrow and the secondaryLabel together, as far as they need, but no
+	 * text below 8px, so what is wider even then is cut. They follow the room
+	 * the entry has and the text spacing a user sets (WCAG 1.4.12). At
+	 * MatrixGrid's default columnWidth and rowHeight, codes of up to three
+	 * characters fit an entry of a split pair, and up to six an entry alone
+	 * in its tile.
 	 */
 	label: React.ReactNode;
 	/**
@@ -190,7 +198,12 @@ export interface MatrixTileItem {
 	 */
 	secondaryLabel?: React.ReactNode;
 	/**
-	 * Direction of the arrow between label and secondaryLabel
+	 * Direction of the arrow between label and secondaryLabel: "vertical"
+	 * puts the secondaryLabel below the label, "horizontal" beside it
+	 * @remarks An entry of a split pair stacked one above the other
+	 * (MatrixCellTileProps.splitDirection "column") always puts it beside the
+	 * label: it is half the row high, too low for the label, the arrow and the
+	 * secondaryLabel one below the other.
 	 * @default "vertical"
 	 */
 	flow?: "horizontal" | "vertical";

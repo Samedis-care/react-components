@@ -96,11 +96,12 @@ const MatrixCellTile = (inProps: MatrixCellTileProps) => {
 				</MatrixTilePlaceholder>
 			) : null;
 	} else if (items.length === 1 || pairLayout === "split") {
+		const stacked = items.length > 1 && splitDirection === "column";
 		content = items
 			.slice(0, 2)
 			.map((item) => (
 				<React.Fragment key={item.key}>
-					{wrap(item, <MatrixTileItem item={item} />)}
+					{wrap(item, <MatrixTileItem item={item} stacked={stacked} />)}
 				</React.Fragment>
 			));
 	} else {

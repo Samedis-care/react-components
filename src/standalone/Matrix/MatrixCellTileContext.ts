@@ -45,12 +45,17 @@ export interface MatrixCellTileProps {
 	 */
 	pairLayout?: "split" | "diagonal";
 	/**
-	 * Which way a split pair is stacked
+	 * Which way a split pair is stacked: "row" side by side, "column" one
+	 * above the other. An entry of a "column" pair puts its secondaryLabel
+	 * beside its label, whatever its flow says (see MatrixTileItem.flow).
 	 * @remarks Each entry of a split pair is half of the tile less 3px in this
 	 * direction (2px of padding on either side and 2px between the two), so
 	 * clickable entries of at least 24x24px (WCAG 2.5.8 Target Size) need a
 	 * tile of 54px or more in this direction. In a MatrixGrid the tile is 1px
 	 * less than columnWidth and rowHeight (the cell's border).
+	 *
+	 * A label that does not fit its entry is drawn smaller, down to 8px (see
+	 * MatrixTileItem.label).
 	 * @default "row"
 	 */
 	splitDirection?: "row" | "column";

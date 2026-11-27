@@ -37,6 +37,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-27 | [A toast breaks a word too long for a line and stays within the screen](2026-11-27-toast-breaks-long-words.md) | behavior |
 | 2026-11-27 | [showInfoDialog calls the onClose it is given](2026-11-27-show-info-dialog-calls-on-close.md) | behavior |
 | 2026-11-27 | [A Matrix press let go of away from the grid adds nothing](2026-11-27-matrix-release-away-from-grid-adds-nothing.md) | behavior |
+| 2026-11-27 | [A Matrix entry draws what does not fit it smaller, and a stacked pair puts its secondary label beside the label](2026-11-27-matrix-labels-fit-their-entries.md) | behavior |
 | 2026-11-27 | [A Matrix entry says its state and its arrow, its ring stands out, and forced colors keep its shape](2026-11-27-matrix-entry-states-in-words-and-forced-colors.md) | behavior |
 | 2026-11-26 | [A localized value without text in the UI language shows another language's text](2026-11-26-localized-string-falls-back-to-another-language.md) | behavior |
 | 2026-11-26 | [A HistoryRouter inside another one leaves the page's scroll position and focus alone](2026-11-26-nested-history-router-keeps-page-scroll-and-focus.md) | behavior |

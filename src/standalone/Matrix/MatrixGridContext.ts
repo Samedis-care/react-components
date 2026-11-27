@@ -76,7 +76,9 @@ export interface MatrixGridProps<TCell> {
 	 * @remarks Two entries side by side in a cell (a MatrixCellTile split pair
 	 * with splitDirection "row") are half of the column less 3.5px wide each:
 	 * 24.5px at 56px, and narrower than the 24px a clickable target needs
-	 * (WCAG 2.5.8 Target Size) below 55px.
+	 * (WCAG 2.5.8 Target Size) below 55px. The labels of a MatrixCellTile that
+	 * do not fit its entries are drawn smaller, down to 8px (see
+	 * MatrixTileItem.label).
 	 * @default 56
 	 */
 	columnWidth?: number;
@@ -85,7 +87,9 @@ export interface MatrixGridProps<TCell> {
 	 * @remarks Two entries stacked in a cell (a MatrixCellTile split pair with
 	 * splitDirection "column") are half of the row less 3.5px high each:
 	 * 25.5px at 58px, and lower than the 24px a clickable target needs (WCAG
-	 * 2.5.8 Target Size) below 55px.
+	 * 2.5.8 Target Size) below 55px. The labels of a MatrixCellTile that do
+	 * not fit its entries are drawn smaller, down to 8px (see
+	 * MatrixTileItem.label).
 	 * @default 58
 	 */
 	rowHeight?: number;

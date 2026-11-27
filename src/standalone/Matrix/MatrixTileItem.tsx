@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import { styled, Tooltip, useTheme } from "@mui/material";
 import combineClassNames from "../../utils/combineClassNames";
 import { cssVar, matrixClasses, matrixVars } from "./matrixClasses";
@@ -9,6 +9,7 @@ import MatrixTileCorners from "./MatrixTileCorners";
 import MatrixTileFlowArrow from "./MatrixTileFlowArrow";
 import MatrixTileStateText from "./MatrixTileStateText";
 import useMatrixActivation from "./useMatrixActivation";
+import useMatrixTileFit from "./useMatrixTileFit";
 import { MatrixTileItem as MatrixTileItemData } from "./types";
 
 export const MatrixTileItemRoot = styled("div", {
@@ -52,7 +53,11 @@ export const MatrixTileItemContent = styled("div", {
 	justifyContent: "center",
 	fontWeight: 700,
 	lineHeight: 1,
-	minWidth: 0,
+	// Its natural size, never shrunk to the entry's: the entry measures it,
+	// and content that does not fit is scaled down (useMatrixTileFit). A
+	// scale, not a smaller font, so the layout and the measurement stay put.
+	flexShrink: 0,
+	scale: `var(${matrixVars.tileFit}, none)`,
 	fontSize: cssVar(matrixVars.tileFontSize),
 	[`&.${matrixClasses.flowHorizontal}`]: {
 		flexDirection: "row",
@@ -67,7 +72,8 @@ export const MatrixTileItemContent = styled("div", {
  * Font size for a short code: the shorter it is, the bigger it can be. Only a
  * plain string or a number can be measured this way — a number counts as the
  * digits React writes for it, so 1234 is sized like "1234". Any other
- * ReactNode keeps the default.
+ * ReactNode keeps the default. Where the entry has less room than that size
+ * needs, it draws its content smaller still (useMatrixTileFit).
  * @param label The label to size
  * @returns The font size in px: 14 up to two characters, 12 for three, 10
  * for more
@@ -81,15 +87,27 @@ export const labelFontSize = (label: React.ReactNode): number => {
 	return text.length <= 2 ? 14 : text.length === 3 ? 12 : 10;
 };
 
+/**
+ * The smallest font size, in px, an entry's content is scaled down to so it
+ * fits its entry (useMatrixTileFit). Content that does not fit at it is cut.
+ */
+const MATRIX_TILE_MIN_FONT_SIZE = 8;
+
 export interface MatrixTileItemProps {
 	/**
 	 * The entry to draw
 	 */
 	item: MatrixTileItemData;
+	/**
+	 * The entry is one of a split pair stacked one above the other
+	 * (MatrixCellTileProps.splitDirection "column"): half the row high, too
+	 * low for the vertical flow, so the secondary label goes beside the label
+	 */
+	stacked?: boolean;
 }
 
 const MatrixTileItem = (props: MatrixTileItemProps) => {
-	const { item } = props;
+	const { item, stacked } = props;
 	const { onItemClick, classes } = useMatrixCellTileProps();
 	const theme = useTheme();
 	const activate = useCallback(() => {
@@ -102,7 +120,22 @@ const MatrixTileItem = (props: MatrixTileItemProps) => {
 	// below (the cell skips presses inside [role=button]), so the press still
 	// reaches the consumer's renderItem and renderCellWrapper wrappers.
 	const activation = useMatrixActivation(onItemClick ? activate : undefined);
-	const horizontal = (item.flow ?? "vertical") === "horizontal";
+	const horizontal = stacked || (item.flow ?? "vertical") === "horizontal";
+	const fontSize = labelFontSize(item.label);
+	// never above the primary label: the arrow points AT this, it is not the
+	// headline (see MatrixTileItem.secondaryLabel)
+	const secondaryFontSize = Math.min(
+		fontSize,
+		labelFontSize(item.secondaryLabel),
+	);
+	const rootRef = useRef<HTMLDivElement>(null);
+	const contentRef = useRef<HTMLDivElement>(null);
+	useMatrixTileFit(
+		rootRef,
+		contentRef,
+		MATRIX_TILE_MIN_FONT_SIZE /
+			(item.secondaryLabel != null ? secondaryFontSize : fontSize),
+	);
 	const style = useMemo(() => {
 		const colors = tileColors(
 			theme,
@@ -113,25 +146,21 @@ const MatrixTileItem = (props: MatrixTileItemProps) => {
 		return {
 			[matrixVars.tileBackground]: colors.fill,
 			[matrixVars.tileForeground]: colors.label,
-			[matrixVars.tileFontSize]: `${labelFontSize(item.label)}px`,
-			// never above the primary label: the arrow points AT this, it is
-			// not the headline (see MatrixTileItem.secondaryLabel)
-			[matrixVars.tileSecondaryFontSize]: `${Math.min(
-				labelFontSize(item.label),
-				labelFontSize(item.secondaryLabel),
-			)}px`,
+			[matrixVars.tileFontSize]: `${fontSize}px`,
+			[matrixVars.tileSecondaryFontSize]: `${secondaryFontSize}px`,
 		} as React.CSSProperties;
 	}, [
 		theme,
 		item.backgroundColor,
 		item.textColor,
 		item.dimmed,
-		item.label,
-		item.secondaryLabel,
+		fontSize,
+		secondaryFontSize,
 	]);
 
 	const entry = (
 		<MatrixTileItemRoot
+			ref={rootRef}
 			className={combineClassNames([
 				classes?.item,
 				item.dimmed && matrixClasses.itemDimmed,
@@ -141,6 +170,7 @@ const MatrixTileItem = (props: MatrixTileItemProps) => {
 			{...activation}
 		>
 			<MatrixTileItemContent
+				ref={contentRef}
 				className={combineClassNames([
 					classes?.itemContent,
 					horizontal && matrixClasses.flowHorizontal,
