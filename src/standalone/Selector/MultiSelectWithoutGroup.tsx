@@ -125,7 +125,7 @@ const StyledInlineSwitch = styled(InlineSwitch, {
 		direction: "rtl",
 		// the label's text keeps the direction of its own words, so punctuation at its
 		// end stays there ("Show inactive?", not "?Show inactive")
-		"& .MuiGrid-container > :last-child": {
+		"& > label > :last-child": {
 			unicodeBidi: "plaintext",
 		},
 	},

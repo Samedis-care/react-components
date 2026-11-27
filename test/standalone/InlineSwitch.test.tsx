@@ -8,10 +8,17 @@ import {
 	screen,
 	waitFor,
 } from "@testing-library/react";
-import { createTheme, styled, Theme, ThemeProvider } from "@mui/material";
+import {
+	createTheme,
+	styled,
+	Theme,
+	ThemeOptions,
+	ThemeProvider,
+} from "@mui/material";
 import InlineSwitch, {
 	InlineSwitchClassKey,
 	InlineSwitchProps,
+	InlineSwitchThemeProps,
 } from "../../src/standalone/InlineSwitch";
 import type * as PackageRoot from "../../src";
 import BaseSelector, {
@@ -31,6 +38,15 @@ const theme = createTheme();
 
 const renderSwitch = (ui: React.ReactElement, t: Theme = theme) =>
 	render(<ThemeProvider theme={t}>{ui}</ThemeProvider>);
+
+/** what a theme accepts as `components.CcInlineSwitch.defaultProps` */
+type InlineSwitchDefaults = NonNullable<
+	NonNullable<ThemeOptions["components"]>["CcInlineSwitch"]
+>["defaultProps"];
+
+/** a theme with these InlineSwitch defaults */
+const themeWithDefaults = (defaultProps: InlineSwitchDefaults) =>
+	createTheme({ components: { CcInlineSwitch: { defaultProps } } });
 
 /** the handler of a switch whose toggles the test does not look at */
 const ignore = () => {};
@@ -301,6 +317,27 @@ describe("InlineSwitch label and name", () => {
 			/>,
 		);
 	});
+
+	it("[ISSUE-3465-ITEM-18] the <label> holds phrasing content only: the switch and its text sit in spans", () => {
+		const { container } = renderSwitch(
+			<InlineSwitch
+				value={false}
+				visible
+				label="Show inactive"
+				onChange={ignore}
+			/>,
+		);
+		const label = container.querySelector("label");
+		if (!label) throw new Error("label missing");
+		expect(label).toHaveTextContent("Show inactive");
+		// a <label> allows phrasing content only, so no <div> (the switch itself is spans
+		// and its input)
+		const notPhrasing = Array.from(
+			label.querySelectorAll(":not(span, input)"),
+			(el) => el.tagName,
+		);
+		expect(notPhrasing).toEqual([]);
+	});
 });
 
 describe("InlineSwitch controlled value", () => {
@@ -512,6 +549,48 @@ describe("InlineSwitch styling and theme", () => {
 			expect.any(Function),
 		);
 	});
+
+	it("[ISSUE-3465-ITEM-18] a theme's defaultProps offer no props of a single switch: its value, onChange, children and the ids that name and describe it", () => {
+		// checked by tsc (tsconfig-test.json), not at runtime
+		themeWithDefaults({
+			// @ts-expect-error the value is the state of one switch
+			value: true,
+		});
+		themeWithDefaults({
+			// @ts-expect-error the handler belongs to one switch
+			onChange: ignore,
+		});
+		themeWithDefaults({
+			// @ts-expect-error the content belongs to one switch
+			children: "Device list",
+		});
+		themeWithDefaults({
+			// @ts-expect-error an id points at one element on the page
+			"aria-labelledby": "switch-name",
+		});
+		themeWithDefaults({
+			// @ts-expect-error an id points at one element on the page
+			"aria-describedby": "switch-help",
+		});
+	});
+
+	it("[ISSUE-3465-ITEM-18] a theme sets how switches show and what they are called, and the switch takes those defaults", () => {
+		const t = themeWithDefaults({
+			visible: true,
+			disabled: true,
+			label: "From the theme",
+			className: "themed",
+			classes: { switch: "themed-switch" },
+		});
+		const { container } = renderSwitch(
+			<InlineSwitch value={false} visible onChange={ignore} />,
+			t,
+		);
+		const sw = screen.getByRole("switch", { name: "From the theme" });
+		expect(sw).toBeDisabled();
+		expect(rootOf(container)).toHaveClass("themed");
+		expect(switchRootOf(container)).toHaveClass("themed-switch");
+	});
 });
 
 describe("InlineSwitch exports", () => {
@@ -531,6 +610,19 @@ describe("InlineSwitch exports", () => {
 		// checked by tsc (tsconfig-test.json), not at runtime
 		expectTypeOf<PackageRoot.InlineSwitchProps>().toEqualTypeOf<InlineSwitchProps>();
 		expectTypeOf<PackageRoot.InlineSwitchClassKey>().toEqualTypeOf<InlineSwitchClassKey>();
+	});
+	it("[ISSUE-3465-ITEM-18] exports its theme props type from the package root", () => {
+		// checked by tsc (tsconfig-test.json), not at runtime
+		expectTypeOf<PackageRoot.InlineSwitchThemeProps>().toEqualTypeOf<InlineSwitchThemeProps>();
+	});
+	it("[ISSUE-3465-ITEM-18] the folder's index re-exports InlineSwitch from its own file", async () => {
+		// a glob, so the test file still loads where the file is missing
+		const own = import.meta.glob<{ default: unknown }>(
+			"../../src/standalone/InlineSwitch/InlineSwitch.tsx",
+		);
+		const load = own["../../src/standalone/InlineSwitch/InlineSwitch.tsx"];
+		expect(load, "InlineSwitch/InlineSwitch.tsx is missing").toBeDefined();
+		expect((await load()).default).toBe(InlineSwitch);
 	});
 });
 
@@ -911,5 +1003,24 @@ describe("InlineSwitch in the selectors", () => {
 			expect(screen.getByRole("switch", { name })).not.toHaveAttribute(
 				"aria-describedby",
 			);
+	});
+
+	it("[ISSUE-3465-ITEM-18] MultiSelectWithoutGroup's switch label, before the switch, keeps the direction of its own words", () => {
+		renderSwitch(
+			<MultiSelectWithoutGroup
+				label="Departments"
+				selected={[]}
+				onSelect={() => {}}
+				loadDataOptions={selectorLocalLoadHandler([])}
+				displaySwitch
+				switchLabel="Show inactive?"
+				switchValue={false}
+				setSwitchValue={() => {}}
+			/>,
+		);
+		// the switch row runs right to left; the text itself keeps its punctuation at its end
+		expect(
+			getComputedStyle(screen.getByText("Show inactive?")).unicodeBidi,
+		).toBe("plaintext");
 	});
 });

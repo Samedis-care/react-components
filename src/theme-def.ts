@@ -125,7 +125,7 @@ import {
 } from "./standalone/SignalPortlet/SignalPortletItem";
 import {
 	InlineSwitchClassKey,
-	InlineSwitchProps,
+	InlineSwitchThemeProps,
 } from "./standalone/InlineSwitch";
 import {
 	MultiSelectEntryClassKey,
@@ -495,7 +495,7 @@ declare module "@mui/material/styles" {
 		CcHowToBox: Partial<HowToBoxProps>;
 		CcInfoBox: Partial<InfoBoxProps>;
 		CcFormPageLayout: Partial<FormPageLayoutProps>;
-		CcInlineSwitch: Partial<InlineSwitchProps>;
+		CcInlineSwitch: Partial<InlineSwitchThemeProps>;
 		// The selectors' defaults keep switchLabel required while they show the switch
 		// (displaySwitch, switchFilterName…), as their props do: it is the switch's name.
 		CcBaseSelector: PartialExcept<

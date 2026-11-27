@@ -1,11 +1,13 @@
 import React, { useCallback, useMemo } from "react";
-import { Grid, styled, Switch, Typography, useThemeProps } from "@mui/material";
+import { styled, Switch, Typography, useThemeProps } from "@mui/material";
 import combineClassNames from "../../utils/combineClassNames";
 import addSlotAttributes from "../../utils/internal/addSlotAttributes";
+import { DistributiveOmit } from "../../utils/distributiveOmit";
 
 /**
  * Props of {@link InlineSwitch}. Theme defaults go in
- * `theme.components.CcInlineSwitch.defaultProps`.
+ * `theme.components.CcInlineSwitch.defaultProps`; see
+ * {@link InlineSwitchThemeProps} for the props a theme can set.
  *
  * `onChange` is required unless `disabled` is true: a switch without a handler
  * has to be disabled, or it would look and be announced as operable while it
@@ -27,7 +29,9 @@ export type InlineSwitchProps = {
 	 * switch's accessible name; without a label, name the switch with `aria-label`
 	 * or `aria-labelledby`. A label too long for the space beside the switch wraps
 	 * there, at a space or, inside a word longer than that space, at any character;
-	 * its first line is centered beside the switch.
+	 * its first line is centered beside the switch. It is rendered inside the
+	 * switch's `<label>`, so it takes phrasing content only: text and inline
+	 * elements such as `<span>` or `<strong>`, no `<div>` or `<p>`.
 	 */
 	label?: React.ReactNode;
 	/**
@@ -124,6 +128,17 @@ export type InlineSwitchProps = {
 	  }
 );
 
+/**
+ * The InlineSwitch props a theme can set (`components.CcInlineSwitch.defaultProps`,
+ * where each is optional): how switches show and what they are called. It leaves out
+ * the props of a single switch: its `value` and `onChange`, its `children`, and
+ * `aria-labelledby` and `aria-describedby`, the ids of elements next to one switch.
+ */
+export type InlineSwitchThemeProps = DistributiveOmit<
+	InlineSwitchProps,
+	"value" | "onChange" | "children" | "aria-labelledby" | "aria-describedby"
+>;
+
 const AntSwitch = styled(Switch, { name: "CcInlineSwitch", slot: "switch" })(
 	({ theme }) => ({
 		width: 35,
@@ -208,41 +223,47 @@ const StyledSwitchWrapper = styled(Typography, {
 	slot: "switchWrapper",
 })(({ theme }) => ({
 	float: "right",
-	// the row of switch and label (the `<label>`, a Grid that does not wrap): a label
-	// too long for the space beside the switch wraps there, at a space or, inside a
-	// word longer than that space, at any character, so the float is never wider than
-	// the root and the switch never leaves it. Both start at the row's top. A click
-	// anywhere on it toggles the switch, so it shows the pointer cursor, as MUI's
-	// FormControlLabel does
-	"& > .MuiGrid-container": {
-		alignItems: "flex-start",
-		cursor: "pointer",
+	[`&.${DISABLED_CLASS}`]: {
+		color: (theme.vars || theme).palette.text.disabled,
 	},
-	// the switch keeps its width, centered in the row's height
-	"& > .MuiGrid-container > :first-of-type": {
-		display: "flex",
-		alignItems: "center",
-		flexShrink: 0,
-		height: ROW_HEIGHT,
-	},
-	// the label's lines have the caption's line height; the first one is centered in
-	// the row's height, beside the switch
-	"& > .MuiGrid-container > :last-child": {
-		overflowWrap: "anywhere",
-		paddingBlock: `calc((${ROW_HEIGHT}px - 1lh) / 2)`,
+})) as typeof Typography;
+
+// the row of switch and label, a flex row that does not wrap. A `<label>` holds
+// phrasing content only, so its cells are spans. A label too long for the space
+// beside the switch wraps there, at a space or, inside a word longer than that
+// space, at any character, so the float is never wider than the root and the switch
+// never leaves it. Both start at the row's top. A click anywhere on it toggles the
+// switch, so it shows the pointer cursor, as MUI's FormControlLabel does
+const StyledLabel = styled("label")(({ theme }) => ({
+	display: "flex",
+	alignItems: "flex-start",
+	gap: theme.spacing(1),
+	cursor: "pointer",
+	[`.${DISABLED_CLASS} > &`]: {
+		cursor: "default",
 	},
 	// without a label (a switch named by `aria-label`) the row is as high as the switch
-	"& > .MuiGrid-container:has(> :last-child:empty) > *": {
+	"&:has(> :last-child:empty) > *": {
 		height: "auto",
 		paddingBlock: 0,
 	},
-	[`&.${DISABLED_CLASS}`]: {
-		color: (theme.vars || theme).palette.text.disabled,
-		"& > .MuiGrid-container": {
-			cursor: "default",
-		},
-	},
-})) as typeof Typography;
+}));
+
+// the switch keeps its width, centered in the row's height
+const StyledSwitchCell = styled("span")({
+	display: "flex",
+	alignItems: "center",
+	flexShrink: 0,
+	height: ROW_HEIGHT,
+});
+
+// the label's lines have the caption's line height; the first one is centered in the
+// row's height, beside the switch
+const StyledLabelText = styled("span")({
+	minWidth: 0,
+	overflowWrap: "anywhere",
+	paddingBlock: `calc((${ROW_HEIGHT}px - 1lh) / 2)`,
+});
 
 /**
  * Keys of the theme's `components.CcInlineSwitch.styleOverrides`, also the
@@ -327,8 +348,8 @@ const InlineSwitch = (inProps: InlineSwitchProps) => {
 					])}
 					variant={"caption"}
 				>
-					<Grid component="label" container wrap="nowrap" spacing={1}>
-						<Grid>
+					<StyledLabel>
+						<StyledSwitchCell>
 							<AntSwitch
 								className={combineClassNames([SWITCH_CLASS, classes?.switch])}
 								checked={value}
@@ -338,9 +359,9 @@ const InlineSwitch = (inProps: InlineSwitchProps) => {
 								disableFocusRipple
 								slotProps={switchSlotProps}
 							/>
-						</Grid>
-						<Grid>{label}</Grid>
-					</Grid>
+						</StyledSwitchCell>
+						<StyledLabelText>{label}</StyledLabelText>
+					</StyledLabel>
 				</StyledSwitchWrapper>
 			)}
 			<div>{children}</div>
